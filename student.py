@@ -261,6 +261,21 @@ def set_bomb_danger_zones(bombs):
         bomb_danger_zone += bomb
     return bomb_danger_zone
 
+def verify_range_bomb(bomberman, bomb, range): #o range deve de ser 3
+    x_bomberman = bomberman[0]
+    y_bomberman = bomberman[1]
+    x_bomb = bomb[0]
+    y_bomb = bomb[1]
+    
+    if x_bomberman >= x_bomb - range and y_bomberman == y_bomb and (abs(x_bomberman)-abs(x_bomb) <= range):
+        return False
+    elif x_bomberman <= x_bomb + range and y_bomberman == y_bomb and (abs(x_bomberman)-abs(x_bomb) <= range):
+        return False
+    elif x_bomberman == x_bomb and y_bomberman >= y_bomb - range and (abs(y_bomberman)-abs(y_bomb) <= range):
+        return False
+    elif x_bomberman == x_bomb and y_bomberman <= y_bomb + range and (abs(y_bomberman)-abs(y_bomb) <= range):
+        return False
+    return True
 
 def next_move(bomberman, cw, walls, danger_zone):
         better_mov = ""
