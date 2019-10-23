@@ -84,13 +84,14 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         wlk_path = wlk_path[1:]
                 else:
                     print("bomb")
-                    if wlk_path == []:
+                    if wlk_path == [] or wlk_path ==['']:
                         p = SearchProblem(game_walls, state['bomberman'], bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2]))
                         t = SearchTree(p,'a*')
                         print(convert_to_path(list(t.search(100))))
                         wlk_path = convert_to_path(list(t.search(100)))
                     print(wlk_path)
                     on_wall = False
+                    print("on_wall: ", on_wall)
                     if len(wlk_path) == 1:
                         key = wlk_path[0]
                         count = 2
@@ -152,7 +153,10 @@ def bomb_fled(bomberman, bomba, radius):
     while i <= radius:
         j = -radius
         while j <= radius:
+            print("try")
             if verify_range_bomb([bomba[0]+i,bomba[1]+j], bomba, radius):
+                print("return primeiro quadrado")
+                print("[bomba[0]+i,bomba[1]+j]: ", [bomba[0]+i,bomba[1]+j])
                 return [bomba[0]+i,bomba[1]+j]
     bomb_fled(bomba, radius+1)
 
