@@ -11,6 +11,7 @@ from tree_search_bomb import *
 from paredes import Paredes
 from characters import *
 from game import *
+import time
 
 # Next 2 lines are not needed for AI agent
 import pygame
@@ -85,7 +86,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 else:
                     print("bomb")
                     if wlk_path == [] or wlk_path ==['']:
-                        p = SearchProblem(game_walls, state['bomberman'], bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2]))
+                        p = SearchProblem(game_walls, state['bomberman'], bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], size_map, walls))
                         t = SearchTree(p,'a*')
                         print(convert_to_path(list(t.search(100))))
                         wlk_path = convert_to_path(list(t.search(100)))
@@ -148,16 +149,19 @@ def near_wall(bomberman, wall):
         return True
     return False
 
-def bomb_fled(bomberman, bomba, radius):
+def bomb_fled(bomberman, bomba, radius, size_map, walls):
     i = -radius
     while i <= radius:
         j = -radius
         while j <= radius:
             print("try")
-            if verify_range_bomb([bomba[0]+i,bomba[1]+j], bomba, radius):
+            print("[bomba[0]+i,bomba[1]+j]: ", [bomba[0]+i,bomba[1]+j])
+            if verify_range_bomb([bomba[0]+i,bomba[1]+j], bomba, radius, size_map, walls):
                 print("return primeiro quadrado")
                 print("[bomba[0]+i,bomba[1]+j]: ", [bomba[0]+i,bomba[1]+j])
                 return [bomba[0]+i,bomba[1]+j]
+            j+=1
+        i+=1
     bomb_fled(bomba, radius+1)
 
 def bomb_safe(bomberman, bomb_danger_zone):
@@ -187,20 +191,29 @@ def convert_to_path(p):
     elif p[0][1] - p[1][1] == -1:
         return ["s"] + convert_to_path(p[1:])
 
-def verify_range_bomb(bomberman, bomb, radius):
+def verify_range_bomb(bomberman, bomb, radius, size_map, walls):
     x_bomberman = bomberman[0]
     y_bomberman = bomberman[1]
     x_bomb = bomb[0]
     y_bomb = bomb[1]
     
-    if x_bomberman >= x_bomb - radius and y_bomberman == y_bomb and (abs(x_bomberman)-abs(x_bomb) <= radius):
+    if (x_bomberman >= x_bomb - radius and y_bomberman == y_bomb) and (abs(x_bomberman)-abs(x_bomb) <= radius):
+        print("False1")
         return False
-    elif x_bomberman <= x_bomb + radius and y_bomberman == y_bomb and (abs(x_bomberman)-abs(x_bomb) <= radius):
+    elif (x_bomberman <= x_bomb + radius and y_bomberman == y_bomb) and (abs(x_bomberman)-abs(x_bomb) <= radius):
+        print("False2")
         return False
-    elif x_bomberman == x_bomb and y_bomberman >= y_bomb - radius and (abs(y_bomberman)-abs(y_bomb) <= radius):
+    elif (x_bomberman == x_bomb and y_bomberman >= y_bomb - radius) and (abs(y_bomberman)-abs(y_bomb) <= radius):
+        print("False3")
         return False
-    elif x_bomberman == x_bomb and y_bomberman <= y_bomb + radius and (abs(y_bomberman)-abs(y_bomb) <= radius):
+    elif (x_bomberman == x_bomb and y_bomberman <= y_bomb + radius) and (abs(y_bomberman)-abs(y_bomb) <= radius):
+        print("False4")
         return False
+    elif not valid_pos(bomberman, size_map, walls):
+        print("False5")
+        #time.sleep(1)
+        return False
+    print(True)
     return True
 
 def domain(bomberman, walls, size_map):
