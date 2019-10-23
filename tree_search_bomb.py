@@ -1,18 +1,3 @@
-
-# Modulo: tree_search
-# 
-# Fornece um conjunto de classes para suporte a resolucao de 
-# problemas por pesquisa em arvore:
-#    SearchDomain  - dominios de problemas
-#    SearchProblem - problemas concretos a resolver 
-#    SearchNode    - nos da arvore de pesquisa
-#    SearchTree    - arvore de pesquisa, com metodos para 
-#                    a respectiva construcao
-#
-#  (c) Luis Seabra Lopes
-#  Introducao a Inteligencia Artificial, 2012-2018,
-#  Inteligência Artificial, 2014-2018
-
 from abc import ABC, abstractmethod
 
 # Dominios de pesquisa

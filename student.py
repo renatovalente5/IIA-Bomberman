@@ -57,8 +57,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 if math.hypot(target_wall[0]-bomberman[0]+1,target_wall[1]-bomberman[1]+1) > 8.6:
                     target_wall = [bomberman[0]+4, bomberman[1]+4]
                 danger_zones = set_danger_zones(state['enemies'])
-                bomb_danger_zone = set_bomb_danger_zones(state['bombs'])
-                game_walls = Paredes(domain(state['bomberman'],walls,find_close_wall(state['bomberman'],walls),size_map),size_map)
+                print(find_close_wall(state['bomberman'],walls))
+                game_walls = Paredes(domain(state['bomberman'],walls,size_map),size_map)
                 p = SearchProblem(game_walls, state['bomberman'], target_wall)
                 t = SearchTree(p,'a*')
                 if wlk_path == [] and t.search(100) != None and on_wall != True:
@@ -83,72 +83,14 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         key = wlk_path[0]
                         wlk_path = wlk_path[1:]
                 else:
-                    bomb_danger_zone = set_bomb_danger_zones(state['bombs'])
-                    for danger_zone in bomb_danger_zone:
-                        if bomberman != danger_zone:
-                            wlk_path = []
-                        elif bomberman == danger_zone and wlk_path == []:
-                            vec = vector2dir(bomberman[0]-target_wall[0], bomberman[1]-target_wall[1])
-                            if vec == 1 or vec == 3:   #a/d
-                                if not valid_pos([target_wall[0],target_wall[1]-1], size_map, walls):
-                                    if valid_pos([target_wall[0]+1,target_wall[1]-2], size_map, walls):
-                                        p = SearchProblem(game_walls, state['bomberman'], [target_wall[0]+1,target_wall[1]-2])
-                                        t = SearchTree(p,'a*')
-                                        wlk_path = convert_to_path(list(t.search(100)))
-                                    elif valid_pos([target_wall[0]+1,target_wall[1]+2],size_map,walls):
-                                        p = SearchProblem(game_walls, state['bomberman'], [target_wall[0]+1,target_wall[1]+2])
-                                        t = SearchTree(p,'a*')
-                                        wlk_path = convert_to_path(list(t.search(100)))
-                                    elif valid_pos([target_wall[0]-1,target_wall[1]-2],size_map,walls):
-                                        p = SearchProblem(game_walls, state['bomberman'], [target_wall[0]-1,target_wall[1]-2])
-                                        t = SearchTree(p,'a*')
-                                        wlk_path = convert_to_path(list(t.search(100)))
-                                    elif valid_pos([target_wall[0]-1,target_wall[1]+2],size_map,walls):
-                                        p = SearchProblem(game_walls, state['bomberman'], [target_wall[0]-1,target_wall[1]+2])
-                                        t = SearchTree(p,'a*')
-                                        wlk_path = convert_to_path(list(t.search(100)))
-                                    elif valid_pos([target_wall[0]-3,target_wall[1]+1],size_map,walls) and vec == 1:
-                                        p = SearchProblem(game_walls, state['bomberman'], [target_wall[0]-3,target_wall[1]+1])
-                                        t = SearchTree(p,'a*')
-                                        wlk_path = convert_to_path(list(t.search(100)))
-                                elif valid_pos([target_wall[0],target_wall[1]-1],size_map,walls):
-                                    if valid_pos([target_wall[0]-2,target_wall[1]-1],size_map,walls):
-                                        p = SearchProblem(game_walls, state['bomberman'], [target_wall[0]-2,target_wall[1]-1])
-                                        t = SearchTree(p,'a*')
-                                        wlk_path = convert_to_path(list(t.search(100)))
-                                    elif valid_pos([target_wall[0]-2,target_wall[1]+1],size_map,walls):
-                                        pass
-                            if vec == 0 or vec == 2:   #w/s
-                                if not valid_pos([target_wall[0],target_wall[1]-1], size_map, walls):
-                                    if valid_pos([target_wall[0]+1,target_wall[1]-2], size_map, walls):
-                                        p = SearchProblem(game_walls, state['bomberman'], [target_wall[0]+1,target_wall[1]-2])
-                                        t = SearchTree(p,'a*')
-                                        wlk_path = convert_to_path(list(t.search(100)))
-                                    elif valid_pos([target_wall[0]+1,target_wall[1]+2],size_map,walls):
-                                        p = SearchProblem(game_walls, state['bomberman'], [target_wall[0]+1,target_wall[1]+2])
-                                        t = SearchTree(p,'a*')
-                                        wlk_path = convert_to_path(list(t.search(100)))
-                                    elif valid_pos([target_wall[0]-1,target_wall[1]-2],size_map,walls):
-                                        p = SearchProblem(game_walls, state['bomberman'], [target_wall[0]-1,target_wall[1]-2])
-                                        t = SearchTree(p,'a*')
-                                        wlk_path = convert_to_path(list(t.search(100)))
-                                    elif valid_pos([target_wall[0]-1,target_wall[1]+2],size_map,walls):
-                                        p = SearchProblem(game_walls, state['bomberman'], [target_wall[0]-1,target_wall[1]+2])
-                                        t = SearchTree(p,'a*')
-                                        wlk_path = convert_to_path(list(t.search(100)))
-                                    elif valid_pos([target_wall[0]-3,target_wall[1]+1],size_map,walls) and vec == 1:
-                                        p = SearchProblem(game_walls, state['bomberman'], [target_wall[0]-3,target_wall[1]+1])
-                                        t = SearchTree(p,'a*')
-                                        wlk_path = convert_to_path(list(t.search(100)))
-                                elif valid_pos([target_wall[0],target_wall[1]-1],size_map,walls):
-                                    if valid_pos([target_wall[0]-2,target_wall[1]-1],size_map,walls):
-                                        p = SearchProblem(game_walls, state['bomberman'], [target_wall[0]-2,target_wall[1]-1])
-                                        t = SearchTree(p,'a*')
-                                        wlk_path = convert_to_path(list(t.search(100)))
-                                    elif valid_pos([target_wall[0]-2,target_wall[1]+1],size_map,walls):
-                                        pass
-                    on_wall = False
                     print("bomb")
+                    if wlk_path == []:
+                        p = SearchProblem(game_walls, state['bomberman'], bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2]))
+                        t = SearchTree(p,'a*')
+                        print(convert_to_path(list(t.search(100))))
+                        wlk_path = convert_to_path(list(t.search(100)))
+                    print(wlk_path)
+                    on_wall = False
                     if len(wlk_path) == 1:
                         key = wlk_path[0]
                         count = 2
@@ -175,6 +117,7 @@ def valid_pos(pos, size_map, walls):
     if pos[0] == 0 or pos[0] == size_map[0] or pos[1] == 0 or pos[1] == size_map[1]:
         return False
     return True
+
 def valid_moove(pos, mov, size_map, walls):
     if pos[0] == 1 and mov == "a":
         return False
@@ -198,17 +141,27 @@ def valid_moove(pos, mov, size_map, walls):
         if mov == "d" and [pos[0]+1,pos[1]] == i:
             return False
     return True
+
 def near_wall(bomberman, wall):
     if math.hypot(wall[0]-bomberman[0],wall[1]-bomberman[1]) == 1:
         return True
     return False
-def bomb_fled(bomberman, bomba, mapa, detonador = False):
-    b = Bomb(bomberman, mapa,bomba[2])
+
+def bomb_fled(bomberman, bomba, radius):
+    i = -radius
+    while i <= radius:
+        j = -radius
+        while j <= radius:
+            if verify_range_bomb([bomba[0]+i,bomba[1]+j], bomba, radius):
+                return [bomba[0]+i,bomba[1]+j]
+    bomb_fled(bomba, radius+1)
+
 def bomb_safe(bomberman, bomb_danger_zone):
     for i in bomb_danger_zone:
         if bomberman == i:
             return False
     return True
+
 def find_close_wall(bomberman, walls):
     aux = 100000
     for i in walls:
@@ -217,6 +170,7 @@ def find_close_wall(bomberman, walls):
             aux = dist
             x = i
     return x
+
 def convert_to_path(p):
     if len(p) == 1:
         return [""]
@@ -228,6 +182,52 @@ def convert_to_path(p):
         return ["w"] + convert_to_path(p[1:])
     elif p[0][1] - p[1][1] == -1:
         return ["s"] + convert_to_path(p[1:])
+
+def verify_range_bomb(bomberman, bomb, radius):
+    x_bomberman = bomberman[0]
+    y_bomberman = bomberman[1]
+    x_bomb = bomb[0]
+    y_bomb = bomb[1]
+    
+    if x_bomberman >= x_bomb - radius and y_bomberman == y_bomb and (abs(x_bomberman)-abs(x_bomb) <= radius):
+        return False
+    elif x_bomberman <= x_bomb + radius and y_bomberman == y_bomb and (abs(x_bomberman)-abs(x_bomb) <= radius):
+        return False
+    elif x_bomberman == x_bomb and y_bomberman >= y_bomb - radius and (abs(y_bomberman)-abs(y_bomb) <= radius):
+        return False
+    elif x_bomberman == x_bomb and y_bomberman <= y_bomb + radius and (abs(y_bomberman)-abs(y_bomb) <= radius):
+        return False
+    return True
+
+def domain(bomberman, walls, size_map):
+    y = size_map[1]
+    x = size_map[0]
+    lista = []
+    i = 1
+    while i < y:
+        j = 1
+        while j < x:
+            if valid_pos([i,j],size_map,walls):
+                if valid_pos([i+1,j],size_map,walls):
+                    lista += [([i,j],[i+1,j],1)]
+                if valid_pos([i-1,j],size_map,walls):
+                    lista += [([i,j],[i-1,j],1)]
+                if valid_pos([i,j+1],size_map,walls):
+                    lista += [([i,j],[i,j+1],1)]
+                if valid_pos([i,j-1],size_map,walls):
+                    lista += [([i,j],[i,j-1],1)]
+            j += 1
+        i += 1
+    return lista
+
+
+
+def set_walls(wall):
+    walls = []
+    for i in wall:
+        walls += [i]
+    return walls
+
 def set_walls(wall):
     walls = []
     for i in wall:
@@ -260,146 +260,6 @@ def set_bomb_danger_zones(bombs):
             i += 1
         bomb_danger_zone += bomb
     return bomb_danger_zone
-
-def verify_range_bomb(bomberman, bomb, range): #o range deve de ser 3
-    x_bomberman = bomberman[0]
-    y_bomberman = bomberman[1]
-    x_bomb = bomb[0]
-    y_bomb = bomb[1]
-    
-    if x_bomberman >= x_bomb - range and y_bomberman == y_bomb and (abs(x_bomberman)-abs(x_bomb) <= range):
-        return False
-    elif x_bomberman <= x_bomb + range and y_bomberman == y_bomb and (abs(x_bomberman)-abs(x_bomb) <= range):
-        return False
-    elif x_bomberman == x_bomb and y_bomberman >= y_bomb - range and (abs(y_bomberman)-abs(y_bomb) <= range):
-        return False
-    elif x_bomberman == x_bomb and y_bomberman <= y_bomb + range and (abs(y_bomberman)-abs(y_bomb) <= range):
-        return False
-    return True
-
-def next_move(bomberman, cw, walls, danger_zone):
-        better_mov = ""
-        dist = math.hypot(bomberman[0]-cw[0],bomberman[1]-cw[1])
-        if math.hypot(bomberman[0]+1-cw[0],bomberman[1]-cw[1]) < dist and valid_pos([bomberman[0]+1,bomberman[1]]) and [bomberman[0]+1,bomberman[1]] not in danger_zone:
-                dist = math.hypot(bomberman[0]+1-cw[0],bomberman[1]-cw[1])
-                better_mov = "d"
-        if math.hypot(bomberman[0]-1-cw[0],bomberman[1]-cw[1]) < dist and valid_pos([bomberman[0]-1,bomberman[1]]) and [bomberman[0]-1,bomberman[1]] not in danger_zone:
-                dist = math.hypot(bomberman[0]-1-cw[0],bomberman[1]-cw[1])
-                better_mov = "a"
-        if math.hypot(bomberman[0]-cw[0],bomberman[1]-1-cw[1]) < dist and valid_pos([bomberman[0],bomberman[1]-1]) and [bomberman[0],bomberman[1]-1] not in danger_zone:
-                dist = math.hypot(bomberman[0]-cw[0],bomberman[1]-1-cw[1])
-                better_mov = "w"
-        if math.hypot(bomberman[0]-cw[0],bomberman[1]+1-cw[1]) < dist and valid_pos([bomberman[0],bomberman[1]+1]) and [bomberman[0],bomberman[1]+1] not in danger_zone:
-                dist = math.hypot(bomberman[0]-cw[0],bomberman[1]+1-cw[1])
-                better_mov = "d"
-
-def domain(bomberman,walls,mr,size_map):
-    print(mr)
-    '''if mr[0] - bomberman[0] > 0 and mr[1] - bomberman[1] > 0:
-        if mr[0]+2 < size_map[0]:
-            x = mr[0]+2
-        elif mr[0]+1 < size_map[0]:
-            x = mr[0]+1
-        else:
-            x = mr[0]
-        if mr[1]+2 < size_map[1]:
-            y = mr[1]+2
-        elif mr[1]+1 < size_map[1]:
-            y = mr[1]+1
-        else:
-            y = mr[1]
-    else:
-        if mr[0]-2 > 0:
-            x = mr[0]-2
-        elif mr[0]-1 > 0:
-            x = mr[0]-1
-        else:
-            x = mr[0]
-        if mr[1]-2 > 0:
-            y = mr[1]-2
-        elif mr[1]-1 > 0:
-            y = mr[1]-1
-        else:
-            y = mr[1]
-    if x<y and x>0:
-        x = y
-    i = bomberman[1]
-    lista = []
-    w = 0
-    z = 0
-    aux = [w,z]'''
-    y = size_map[1]
-    x = size_map[0]
-    lista = []
-    i = 1
-    while i < y:
-        j = 1
-        while j < x:
-            if valid_pos([i,j],size_map,walls):
-                if valid_pos([i+1,j],size_map,walls):
-                    lista += [([i,j],[i+1,j],1)]
-                if valid_pos([i-1,j],size_map,walls):
-                    lista += [([i,j],[i-1,j],1)]
-                if valid_pos([i,j+1],size_map,walls):
-                    lista += [([i,j],[i,j+1],1)]
-                if valid_pos([i,j-1],size_map,walls):
-                    lista += [([i,j],[i,j-1],1)]
-            j += 1
-        i += 1
-    return lista
-
-
-def find_path(pos, dest):
-    path = []
-    x = dest[0]-pos[0]
-    y = dest[1]-pos[1]
-    if x < 0:
-        x_key = "a"
-        x = x*(-1)
-    else:
-        x_key = "d"
-    if y < 0:
-        y_key = "w"
-        y = y*(-1)
-    else:
-        y_key = "s"
-    i = 0
-    while i < x:
-        path += [x_key]
-        i += 1
-    i = 1
-    while i < y:
-        path += [y_key]
-        i += 1
-    return path
-def find_path2(pos, dest):
-    path = []
-    x = dest[0]-pos[0]
-    y = dest[1]-pos[1]
-    if x < 0:
-        x_key = "a"
-        x = x*-1
-    else:
-        x_key = "d"
-    if y < 0:
-        y_key = "w"
-        y = y*-1
-    else:
-        y_key = "s"
-    i = 0
-    while i < y:
-        path += [y_key]
-        i += 1
-    i = 1
-    while i < x:
-        path += [x_key]
-        i += 1
-    return path
-def set_walls(wall):
-    walls = []
-    for i in wall:
-        walls += [i]
-    return walls
     
 # DO NOT CHANGE THE LINES BELLOW
 # You can change the default values using the command line, example:

@@ -1,12 +1,3 @@
-#
-# Modulo: cidades
-# 
-# Implementacao de um dominio para planeamento de caminhos
-# entre cidades usando para esse efeito o modulo tree_search
-#
-# (c) Luis Seabra Lopes, Introducao a Inteligencia Artificial, 2012/2013
-#
-
 from tree_search_bomb import *
 import math
 
