@@ -55,29 +55,28 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 powerups = state['powerups']
                 bomberman = state['bomberman']
                 target_wall = find_close_wall(state['bomberman'],walls)
-                if math.hypot(target_wall[0]-bomberman[0]+1,target_wall[1]-bomberman[1]+1) > 8.6:
-                    target_wall = [bomberman[0]+4, bomberman[1]+4]
+                '''if math.hypot(target_wall[0]-bomberman[0]+1,target_wall[1]-bomberman[1]+1) > 8.6:
+                    target_wall = [bomberman[0]+4, bomberman[1]+4]'''
                 danger_zones = set_danger_zones(state['enemies'])
                 print(find_close_wall(state['bomberman'],walls))
                 game_walls = Paredes(domain(state['bomberman'],walls,size_map),size_map)
                 p = SearchProblem(game_walls, state['bomberman'], target_wall)
                 t = SearchTree(p,'a*')
-                if wlk_path == [] and t.search(100) != None and on_wall != True:
+                if wlk_path == [] and t.search(1000000) != None and on_wall != True:
                     try:
-                        print(t.search(100))
-                        wlk_path = convert_to_path(list(t.search(100)))
+                        print(t.search(1000000))
+                        wlk_path = convert_to_path(list(t.search(1000000)))
                     except:
                         pass
                 print("path: "+str(wlk_path))
                 if state['bombs'] == []:
-                    if walls == [] and state['exit'] != [] and state['enemies'] == []:
+                    if walls == []:
                         p = SearchProblem(game_walls, state['bomberman'], target_wall)
                         t = SearchTree(p,'a*')
-                        wlk_path = convert_to_path(list(t.search(100)))
+                        wlk_path = convert_to_path(list(t.search(1000000)))
                     print("not bomb")
                     bomb_danger_zone = []
                     if (wlk_path == [''] or wlk_path == []) and near_wall(bomberman, find_close_wall(bomberman, walls)):
-                        print("on wall")
                         on_wall = True
                         key = "B"
                     elif wlk_path != []:
@@ -85,23 +84,18 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         wlk_path = wlk_path[1:]
                 else:
                     print("bomb")
-                    if wlk_path == [] or wlk_path ==['']:
-                        p = SearchProblem(game_walls, state['bomberman'], bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], size_map, walls))
-                        t = SearchTree(p,'a*')
-                        print(convert_to_path(list(t.search(100))))
-                        wlk_path = convert_to_path(list(t.search(100)))
+                    p = SearchProblem(game_walls, state['bomberman'], bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], size_map, walls))
+                    t = SearchTree(p,'a*')
+                    if wlk_path != []:
+                        wlk_path = convert_to_path(list(t.search(10000000)))
                     print(wlk_path)
                     on_wall = False
-                    print("on_wall: ", on_wall)
                     if len(wlk_path) == 1:
                         key = wlk_path[0]
-                        count = 2
                         wlk_path = []
                     elif wlk_path != []:
                         key = wlk_path[0]
                         wlk_path = wlk_path[1:]
-                    elif wlk_path == []:
-                        key = ""
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
                 )  # send key command to server - you must implement this send in the AI agent
@@ -116,7 +110,7 @@ def valid_pos(pos, size_map, walls):
     for i in walls:
         if pos == i:
             return False
-    if pos[0] == 0 or pos[0] == size_map[0] or pos[1] == 0 or pos[1] == size_map[1]:
+    if pos[0] <= 0 or pos[0] >= size_map[0] or pos[1] <= 0 or pos[1] >= size_map[1]:
         return False
     return True
 
@@ -180,6 +174,8 @@ def find_close_wall(bomberman, walls):
     return x
 
 def convert_to_path(p):
+    if p == None:
+        return []
     if len(p) == 1:
         return [""]
     if p[0][0] - p[1][0] == 1:
@@ -198,20 +194,14 @@ def verify_range_bomb(bomberman, bomb, radius, size_map, walls):
     y_bomb = bomb[1]
     
     if (x_bomberman >= x_bomb - radius and y_bomberman == y_bomb) and (abs(x_bomberman)-abs(x_bomb) <= radius):
-        print("False1")
         return False
     elif (x_bomberman <= x_bomb + radius and y_bomberman == y_bomb) and (abs(x_bomberman)-abs(x_bomb) <= radius):
-        print("False2")
         return False
     elif (x_bomberman == x_bomb and y_bomberman >= y_bomb - radius) and (abs(y_bomberman)-abs(y_bomb) <= radius):
-        print("False3")
         return False
     elif (x_bomberman == x_bomb and y_bomberman <= y_bomb + radius) and (abs(y_bomberman)-abs(y_bomb) <= radius):
-        print("False4")
         return False
     elif not valid_pos(bomberman, size_map, walls):
-        print("False5")
-        #time.sleep(1)
         return False
     print(True)
     return True
