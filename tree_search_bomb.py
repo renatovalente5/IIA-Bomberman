@@ -96,6 +96,7 @@ class SearchTree:
                 if self.problem.domain.result(node.state,a) != None:
                     newstate = self.problem.domain.result(node.state,a)
                 if not node.in_parent(newstate) and node.depth+1 < limit:
+                    print(".")
                     lnewnodes += [SearchNode(
                                     newstate,
                                     node, 

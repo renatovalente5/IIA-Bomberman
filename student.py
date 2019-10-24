@@ -42,6 +42,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         bomberman = []
         size_map = mapa.size
         on_wall = None
+        the_bomb = False
 
         while True:
             try:
@@ -72,18 +73,23 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         pass
                 print("path: ",wlk_path)
                 if state['bombs'] == []:
-                    if walls == []:
-                        print(target_wall)
-                        p = SearchProblem(game_walls, state['bomberman'], target_wall)
-                        t = SearchTree(p,'a*')
-                        wlk_path = convert_to_path(list(t.search(100)))
-                    bomb_danger_zone = []
-                    if (wlk_path == [''] or wlk_path == []) and near_wall(bomberman, find_close_wall(bomberman, walls)):
-                        on_wall = True
-                        key = "B"
-                    elif wlk_path != []:
-                        key = wlk_path[0]
-                        wlk_path = wlk_path[1:]
+                    if the_bomb == True:
+                        key = ""
+                        the_bomb = False
+                    else:
+                        if walls == []:
+                            print(target_wall)
+                            p = SearchProblem(game_walls, state['bomberman'], target_wall)
+                            t = SearchTree(p,'a*')
+                            wlk_path = convert_to_path(list(t.search(100)))
+                        bomb_danger_zone = []
+                        if (wlk_path == [''] or wlk_path == []) and near_wall(bomberman, find_close_wall(bomberman, walls)):
+                            on_wall = True
+                            the_bomb = True
+                            key = "B"
+                        elif wlk_path != []:
+                            key = wlk_path[0]
+                            wlk_path = wlk_path[1:]
                 elif state['bombs'] != []:
                     print("bomb")
                     print("target wall: ",target_wall)
@@ -146,9 +152,9 @@ def near_wall(bomberman, wall):
     return False
 
 def bomb_fled(bomberman, bomba, radius, size_map, walls):
-    i = 0
+    i = -2
     while i <= radius:
-        j = 0
+        j = -2
         while j <= radius:
             if verify_range_bomb([bomba[0]+i,bomba[1]+j], bomba, radius, size_map, walls):
                 print("valid scape pos: ", [bomba[0]+i,bomba[1]+j])
