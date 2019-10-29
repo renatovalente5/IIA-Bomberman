@@ -35,6 +35,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
         walls = []
         target_wall = []
+        target_enemie = []
         wlk_path = []
         danger_zones = []
         bomb_danger_zone = []
@@ -43,6 +44,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         game_walls = None
         size_map = mapa.size
         on_wall = None
+        pos_enemie = []
 
         while True:
             try:
@@ -52,11 +54,14 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 # Next lines are only for the Human Agent, the key values are nonetheless the correct ones!
                 print("\n\n")
+                
+                #print(state)
+                #print(state['enemies']['pos'])
                 walls = set_walls(state['walls'])
                 powerups = state['powerups']
                 bomberman = state['bomberman']
                 target_wall = find_close_wall(state['bomberman'],walls)
-                if math.hypot(target_wall[0]-bomberman[0]+1,target_wall[1]-bomberman[1]+1) > 8.6:
+                if math.hypot(target_wall[0]-bomberman[0],target_wall[1]-bomberman[1]) > 8.6:
                     print("target too far")
                     print(target_wall)
                     if bomberman[0]-target_wall[0] < 0:
@@ -86,17 +91,34 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         elif bomberman[1]-target_wall[1] > 0:
                             target_wall = try_area(state['bomberman'],5,walls,size_map)
                             print("go from: ",bomberman," to: ",target_wall)
-                game_walls = Paredes(domain(state['bomberman'],walls,size_map),size_map)
-                if state['bombs'] == []:
-                    if not near_wall(state['bomberman'],target_wall):
+                game_walls = Paredes(domain(state['bomberman'],walls,size_map,enemies_all(state['enemies'])),size_map)
+                if state['bombs'] == [] and walls != []:
+                    #x = find_close_wall(state['bomberman'],enemies_all(state['enemies'])),walls,size_map
+                    #if x != None:
+                    #    target_enemie = x
+                    #    p = SearchProblem(game_walls, state['bomberman'], target_enemie)
+                    #    t = SearchTree(p,'greedy')
+                    #    wlk_path = convert_to_path_wall(t.search(100))
+                    #     pos_enemie += [target_enemie]
+                    #     if len(pos_enemie) > 1 and pos_enemie[0][0] == pos_enemie[1][0]:
+                    #         print("--------------------------------------------------")
+                    #         print("not bomb")
+                    #         print("target enemie: ", target_enemie)
+                    #         if target_enemie != None:
+                    #             p = SearchProblem(game_walls, state['bomberman'], [pos_enemie[0]-3, pos_enemie[1]])
+                    #             t = SearchTree(p,'greedy')
+                    #             wlk_path = convert_to_path_wall(t.search(100))
+                    if not near_wall(state['bomberman'],target_wall): #atacar paredes
                         print("not bomb")
                         print("target wall: ", target_wall)
                         p = SearchProblem(game_walls, state['bomberman'], target_wall)
                         t = SearchTree(p,'greedy')
                         wlk_path = convert_to_path_wall(t.search(100))
-                    if (wlk_path == [''] or wlk_path == []) and near_wall(bomberman, find_close_wall(bomberman, walls)):
+                    if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
                         on_wall = True
                         key = "B"
+                    # elif near_enemie(state['enemies'], state['bomberman'],4):
+                    #     key = "B"
                     elif wlk_path != []:
                         key = wlk_path[0]
                         wlk_path = wlk_path[1:]
@@ -190,6 +212,8 @@ def bomb_safe(bomberman, bomb_danger_zone):
 
 def find_close_wall(bomberman, walls):
     aux = 100000
+    if walls == []:
+        return [2,3]
     for i in walls:
         dist = math.hypot(bomberman[0] - i[0], bomberman[1] - i[1])
         if dist < aux:
@@ -242,15 +266,15 @@ def verify_range_bomb(bomberman, bomb, radius, size_map, walls):
     print(True)
     return True
 
-def domain(bomberman, walls, size_map):
+def domain(bomberman, walls, size_map, enemie_list):
     y = size_map[1]
     x = size_map[0]
     lista = []
     i = 1
-    while i < y:
+    while i < x:
         j = 1
-        while j < x:
-            if valid_pos([i,j],size_map,walls):
+        while j < y:
+            if valid_pos([i,j],size_map,walls) and [i,j] not in enemie_list:
                 if valid_pos([i+1,j],size_map,walls):
                     lista += [([i,j],[i+1,j],1)]
                 if valid_pos([i-1,j],size_map,walls):
@@ -353,7 +377,35 @@ def set_bomb_danger_zones(bombs):
             i += 1
         bomb_danger_zone += bomb
     return bomb_danger_zone
-    
+
+def enemies_all(enemies):
+    arr = []
+    for i in enemies:
+        arr += [i['pos']]
+    return arr
+
+def find_enemie_pos(enemie,walls,size):
+    if valid_pos([enemie[0]+1,enemie[1]],size,walls):
+        return [enemie[0]+1,enemie[1]]
+    return None
+
+def near_enemie(target_enemie, bomberman, prox):
+    for enemie in target_enemie:
+        if math.hypot(enemie['pos'][0]-bomberman[0],enemie['pos'][1]-bomberman[1]) < prox:
+            return True
+        else:
+            return False
+    return False
+
+def atack_enemie(target_enemie, bomberman, prox):
+    for enemie in target_enemie:
+        if math.hypot(enemie['pos'][0]-bomberman[0],enemie['pos'][1]-bomberman[1]) < prox:
+            return enemie['pos'] #[enemie['pos'][0]-2, enemie['pos'][1]]
+        else:
+            return None
+    return None
+
+
 # DO NOT CHANGE THE LINES BELLOW
 # You can change the default values using the command line, example:
 # $ NAME='bombastico' python3 client.py
