@@ -45,6 +45,9 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         size_map = mapa.size
         on_wall = None
         pos_enemie = []
+        arrive = False
+        exit_dor = False
+        
 
         while True:
             try:
@@ -57,85 +60,139 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 
                 #print(state)
                 #print(state['enemies']['pos'])
-                walls = set_walls(state['walls'])
-                powerups = state['powerups']
+                try:
+                    walls = set_walls(state['walls'])
+                    powerups = state['powerups']
+                except:
+                    pass
                 bomberman = state['bomberman']
-                target_wall = find_close_wall(state['bomberman'],walls)
-                if math.hypot(target_wall[0]-bomberman[0],target_wall[1]-bomberman[1]) > 8.6:
-                    print("target too far")
-                    print(target_wall)
-                    if bomberman[0]-target_wall[0] < 0:
-                        if bomberman[1]-target_wall[1] < 0:
-                            target_wall = try_area(state['bomberman'],3,walls,size_map)
-                            print("go from: ",bomberman," to: ",target_wall)
-                        elif bomberman[1]-target_wall[1] == 0:
-                            target_wall = try_area(state['bomberman'],6,walls,size_map)
-                            print("go from: ",bomberman," to: ",target_wall)
-                        else:
-                            target_wall = try_area(state['bomberman'],2,walls,size_map)
-                            print("go from: ",bomberman," to: ",target_wall)
-                    elif bomberman[0]-target_wall[0] > 0:
-                        if bomberman[1]-target_wall[1] < 0:
-                            target_wall = try_area(state['bomberman'],4,walls,size_map)
-                            print("go from: ",bomberman," to: ",target_wall)
-                        elif bomberman[1]-target_wall[1] == 0:
-                            target_wall = try_area(state['bomberman'],8,walls,size_map)
-                            print("go from: ",bomberman," to: ",target_wall)
-                        else:
-                            target_wall = try_area(state['bomberman'],1,walls,size_map)
-                            print("go from: ",bomberman," to: ",target_wall)
-                    else:
-                        if bomberman[1]-target_wall[1] < 0:
-                            target_wall = try_area(state['bomberman'],7,walls,size_map)
-                            print("go from: ",bomberman," to: ",target_wall)
-                        elif bomberman[1]-target_wall[1] > 0:
-                            target_wall = try_area(state['bomberman'],5,walls,size_map)
-                            print("go from: ",bomberman," to: ",target_wall)
                 game_walls = Paredes(domain(state['bomberman'],walls,size_map,enemies_all(state['enemies'])),size_map)
-                if state['bombs'] == [] and walls != []:
-                    #x = find_close_wall(state['bomberman'],enemies_all(state['enemies'])),walls,size_map
-                    #if x != None:
-                    #    target_enemie = x
-                    #    p = SearchProblem(game_walls, state['bomberman'], target_enemie)
-                    #    t = SearchTree(p,'greedy')
-                    #    wlk_path = convert_to_path_wall(t.search(100))
-                    #     pos_enemie += [target_enemie]
-                    #     if len(pos_enemie) > 1 and pos_enemie[0][0] == pos_enemie[1][0]:
-                    #         print("--------------------------------------------------")
-                    #         print("not bomb")
-                    #         print("target enemie: ", target_enemie)
-                    #         if target_enemie != None:
-                    #             p = SearchProblem(game_walls, state['bomberman'], [pos_enemie[0]-3, pos_enemie[1]])
-                    #             t = SearchTree(p,'greedy')
-                    #             wlk_path = convert_to_path_wall(t.search(100))
-                    if not near_wall(state['bomberman'],target_wall): #atacar paredes
-                        print("not bomb")
+                if state['exit']!= [] and state['enemies']==[]:
+                    target_wall = state['exit']
+                    if exit_dor == False:
+                        print("-------------------target_wall-----------", target_wall)
+                        print("exit go")
                         print("target wall: ", target_wall)
                         p = SearchProblem(game_walls, state['bomberman'], target_wall)
                         t = SearchTree(p,'greedy')
                         wlk_path = convert_to_path_wall(t.search(100))
+                        exit_dor == True
                     if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
-                        on_wall = True
-                        key = "B"
-                    # elif near_enemie(state['enemies'], state['bomberman'],4):
-                    #     key = "B"
+                        print("cheguei exit")
+                        #arrive = True
+                        #key = "B"
                     elif wlk_path != []:
                         key = wlk_path[0]
                         wlk_path = wlk_path[1:]
-                elif state['bombs'] != []:
-                    print("bomb")
-                    if not verify_range_bomb(state['bomberman'],state['bombs'][0][0],state['bombs'][0][2],size_map,walls):
-                        w = bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], size_map, walls)
-                        p = SearchProblem(game_walls, state['bomberman'],w)
-                        t = SearchTree(p,'greedy')
-                        wlk_path = convert_to_path(t.search(10))
-                        print("go from: ",bomberman," to: ",w)
-                    if len(wlk_path) == 1:
-                        key = wlk_path[0]
-                        wlk_path = []
-                    elif wlk_path != []:
-                        key = wlk_path[0]
-                        wlk_path = wlk_path[1:]
+                else:
+                    if state['walls']!=[]:
+                        target_wall = find_close_wall(state['bomberman'],walls) #acrescentar
+                        if math.hypot(target_wall[0]-bomberman[0],target_wall[1]-bomberman[1]) > 8.6:
+                            print("target too far")
+                            print(target_wall)
+                            if bomberman[0]-target_wall[0] < 0:
+                                if bomberman[1]-target_wall[1] < 0:
+                                    target_wall = try_area(state['bomberman'],3,walls,size_map)
+                                    print("go from: ",bomberman," to: ",target_wall)
+                                elif bomberman[1]-target_wall[1] == 0:
+                                    target_wall = try_area(state['bomberman'],6,walls,size_map)
+                                    print("go from: ",bomberman," to: ",target_wall)
+                                else:
+                                    target_wall = try_area(state['bomberman'],2,walls,size_map)
+                                    print("go from: ",bomberman," to: ",target_wall)
+                            elif bomberman[0]-target_wall[0] > 0:
+                                if bomberman[1]-target_wall[1] < 0:
+                                    target_wall = try_area(state['bomberman'],4,walls,size_map)
+                                    print("go from: ",bomberman," to: ",target_wall)
+                                elif bomberman[1]-target_wall[1] == 0:
+                                    target_wall = try_area(state['bomberman'],8,walls,size_map)
+                                    print("go from: ",bomberman," to: ",target_wall)
+                                else:
+                                    target_wall = try_area(state['bomberman'],1,walls,size_map)
+                                    print("go from: ",bomberman," to: ",target_wall)
+                            else:
+                                if bomberman[1]-target_wall[1] < 0:
+                                    target_wall = try_area(state['bomberman'],7,walls,size_map)
+                                    print("go from: ",bomberman," to: ",target_wall)
+                                elif bomberman[1]-target_wall[1] > 0:
+                                    target_wall = try_area(state['bomberman'],5,walls,size_map)
+                                    print("go from: ",bomberman," to: ",target_wall)
+                        #game_walls = Paredes(domain(state['bomberman'],walls,size_map,enemies_all(state['enemies'])),size_map)
+                        if state['bombs'] == [] and walls != []:
+                            #x = find_close_wall(state['bomberman'],enemies_all(state['enemies'])),walls,size_map
+                            #if x != None:
+                            #    target_enemie = x
+                            #    p = SearchProblem(game_walls, state['bomberman'], target_enemie)
+                            #    t = SearchTree(p,'greedy')
+                            #    wlk_path = convert_to_path_wall(t.search(100))
+                            #     pos_enemie += [target_enemie]
+                            #     if len(pos_enemie) > 1 and pos_enemie[0][0] == pos_enemie[1][0]:
+                            #         print("--------------------------------------------------")
+                            #         print("not bomb")
+                            #         print("target enemie: ", target_enemie)
+                            #         if target_enemie != None:
+                            #             p = SearchProblem(game_walls, state['bomberman'], [pos_enemie[0]-3, pos_enemie[1]])
+                            #             t = SearchTree(p,'greedy')
+                            #             wlk_path = convert_to_path_wall(t.search(100))
+                            if not near_wall(state['bomberman'],target_wall): #atacar paredes
+                                print("not bomb")
+                                print("target wall: ", target_wall)
+                                p = SearchProblem(game_walls, state['bomberman'], target_wall)
+                                t = SearchTree(p,'greedy')
+                                wlk_path = convert_to_path_wall(t.search(100))
+                            if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
+                                on_wall = True
+                                key = "B"
+                            # elif near_enemie(state['enemies'], state['bomberman'],4):
+                            #     key = "B"
+                            elif wlk_path != []:
+                                key = wlk_path[0]
+                                wlk_path = wlk_path[1:]
+                        elif state['bombs'] != []:
+                            print("bomb")
+                            if not verify_range_bomb(state['bomberman'],state['bombs'][0][0],state['bombs'][0][2],size_map,walls):
+                                w = bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], size_map, walls)
+                                p = SearchProblem(game_walls, state['bomberman'],w)
+                                t = SearchTree(p,'greedy')
+                                wlk_path = convert_to_path(t.search(10))
+                                print("go from: ",bomberman," to: ",w)
+                            if len(wlk_path) == 1:
+                                key = wlk_path[0]
+                                wlk_path = []
+                            elif wlk_path != []:
+                                key = wlk_path[0]
+                                wlk_path = wlk_path[1:]
+                    else:
+                        if arrive == False:
+                            target_wall = [1,1]
+                            if not state['bomberman']==target_wall: #atacar paredes
+                                    print("not bomb")
+                                    print("target wall: ", target_wall)
+                                    p = SearchProblem(game_walls, state['bomberman'], target_wall)
+                                    t = SearchTree(p,'greedy')
+                                    wlk_path = convert_to_path_wall(t.search(100))
+                            if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
+                                print("cheguei [1,1]")
+                                arrive = True
+                                key = "B"
+                            elif wlk_path != []:
+                                key = wlk_path[0]
+                                wlk_path = wlk_path[1:]
+                        else:
+                            target_wall = [3,3]
+                            if not state['bomberman']==target_wall: #atacar paredes
+                                    print("not bomb")
+                                    print("target wall: ", target_wall)
+                                    p = SearchProblem(game_walls, state['bomberman'], target_wall)
+                                    t = SearchTree(p,'greedy')
+                                    wlk_path = convert_to_path_wall(t.search(100))
+                            if ((wlk_path == [''] or wlk_path == []) and state['bombs']==[]):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
+                                print("cheguei [3,3]")
+                                arrive = False
+                                #key = "B"
+                            elif wlk_path != []:
+                                key = wlk_path[0]
+                                wlk_path = wlk_path[1:]
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
                 )  # send key command to server - you must implement this send in the AI agent
