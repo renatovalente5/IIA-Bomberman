@@ -47,6 +47,9 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         pos_enemie = []
         arrive = False
         exit_dor = False
+        last_steps = []
+        bug_steps = []
+        run_check = False
         
 
         while True:
@@ -61,11 +64,25 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 #print(state)
                 #print(state['enemies']['pos'])
                 try:
+                    bomberman = state['bomberman']
+                except:
+                    bomberman = [1,1]
+                    print("--+--+-+-+-+-+-+-+-+-+-+-+-+-+-+-+--+--ERROR BOMBERMAN")
+                    pass
+
+                try:
                     walls = set_walls(state['walls'])
                     powerups = state['powerups']
+                    # last_steps.append(bomberman)
+                    # bug_steps = verify_last_steps(last_steps)
                 except:
+                    print("--+--+-+-+-+-+-+-+-+-+-+-+-+-+-+-+--+--ERROR WALLS")
                     pass
-                bomberman = state['bomberman']
+                #print(state)
+                # last_steps.append(bomberman)
+                # if state['step'] > 40:
+                    
+                #     bug_steps = verify_last_steps(last_steps)
                 game_walls = Paredes(domain(state['bomberman'],walls,size_map,enemies_all(state['enemies'])),size_map)
                 if state['exit']!= [] and state['enemies']==[]:
                     target_wall = state['exit']
@@ -75,7 +92,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         print("target wall: ", target_wall)
                         p = SearchProblem(game_walls, state['bomberman'], target_wall)
                         t = SearchTree(p,'greedy')
-                        wlk_path = convert_to_path_wall(t.search(100))
+                        wlk_path = convert_to_path(t.search(100))
                         exit_dor == True
                     if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
                         print("cheguei exit")
@@ -135,30 +152,39 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             #             t = SearchTree(p,'greedy')
                             #             wlk_path = convert_to_path_wall(t.search(100))
                             if not near_wall(state['bomberman'],target_wall): #atacar paredes
-                                print("not bomb")
-                                print("target wall: ", target_wall)
-                                p = SearchProblem(game_walls, state['bomberman'], target_wall)
-                                t = SearchTree(p,'greedy')
-                                wlk_path = convert_to_path_wall(t.search(100))
+                                if run_check == False:
+                                    print("not bomb")
+                                    print("target wall: ", target_wall)
+                                    p = SearchProblem(game_walls, state['bomberman'], target_wall)
+                                    t = SearchTree(p,'greedy')
+                                    wlk_path = convert_to_path_wall(t.search(100))
+                                    run_check = True
+
                             if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
                                 on_wall = True
-                                key = "B"
+                                run_check = False
+                                if(near_wall(state['bomberman'],target_wall)):
+                                    key = "B"
                             # elif near_enemie(state['enemies'], state['bomberman'],4):
                             #     key = "B"
                             elif wlk_path != []:
                                 key = wlk_path[0]
                                 wlk_path = wlk_path[1:]
+                                #run_check = False
                         elif state['bombs'] != []:
                             print("bomb")
                             if not verify_range_bomb(state['bomberman'],state['bombs'][0][0],state['bombs'][0][2],size_map,walls):
-                                w = bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], size_map, walls)
-                                p = SearchProblem(game_walls, state['bomberman'],w)
-                                t = SearchTree(p,'greedy')
-                                wlk_path = convert_to_path(t.search(10))
-                                print("go from: ",bomberman," to: ",w)
+                                if run_check == False:
+                                    w = bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], size_map, walls)
+                                    p = SearchProblem(game_walls, state['bomberman'],w)
+                                    t = SearchTree(p,'greedy')
+                                    wlk_path = convert_to_path(t.search(10))
+                                    print("go from: ",bomberman," to: ",w)
+                                    run_check = True
                             if len(wlk_path) == 1:
                                 key = wlk_path[0]
                                 wlk_path = []
+                                run_check = False
                             elif wlk_path != []:
                                 key = wlk_path[0]
                                 wlk_path = wlk_path[1:]
@@ -166,29 +192,35 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         if arrive == False:
                             target_wall = [1,1]
                             if not state['bomberman']==target_wall: #atacar paredes
+                                if run_check == False:    
                                     print("not bomb")
                                     print("target wall: ", target_wall)
                                     p = SearchProblem(game_walls, state['bomberman'], target_wall)
                                     t = SearchTree(p,'greedy')
-                                    wlk_path = convert_to_path_wall(t.search(100))
+                                    wlk_path = convert_to_path(t.search(100))
+                                    run_check = True
                             if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
                                 print("cheguei [1,1]")
                                 arrive = True
+                                run_check = False
                                 key = "B"
                             elif wlk_path != []:
                                 key = wlk_path[0]
                                 wlk_path = wlk_path[1:]
                         else:
-                            target_wall = [3,3]
+                            target_wall = [2,3]
                             if not state['bomberman']==target_wall: #atacar paredes
+                                if run_check == False:    
                                     print("not bomb")
                                     print("target wall: ", target_wall)
                                     p = SearchProblem(game_walls, state['bomberman'], target_wall)
                                     t = SearchTree(p,'greedy')
-                                    wlk_path = convert_to_path_wall(t.search(100))
+                                    wlk_path = convert_to_path(t.search(100))
+                                    run_check =  True
                             if ((wlk_path == [''] or wlk_path == []) and state['bombs']==[]):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
                                 print("cheguei [3,3]")
                                 arrive = False
+                                run_check = False
                                 #key = "B"
                             elif wlk_path != []:
                                 key = wlk_path[0]
@@ -395,6 +427,8 @@ def try_area(bomberman, quadrante, walls, size_map):
             if(valid_pos([bomberman[0]-i,bomberman[1]],size_map,walls)):
                     return [bomberman[0]-i,bomberman[1]]
             i -= 1
+    print("YAP ACORREU ERRO++++++++++++++++++++++++++++++++++")
+    return [bomberman[0] +1,bomberman[1]+1]
 
 def set_walls(wall):
     walls = []
@@ -461,6 +495,16 @@ def atack_enemie(target_enemie, bomberman, prox):
         else:
             return None
     return None
+
+def verify_last_steps(steps):
+    aux = []
+    i = 0
+    if i < 12:
+        aux.append(steps.pop(-1))
+        i +=1
+    if aux[1]==aux[5] and aux[5]==aux[9] and aux[9]==[14] and aux[2]==aux[4] and aux[4]==aux[6] and aux[6]==[8] :
+        return ["d","s"]
+    return []
 
 
 # DO NOT CHANGE THE LINES BELLOW
