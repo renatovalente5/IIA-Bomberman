@@ -213,8 +213,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
                                 on_wall = True
                                 run_check = False
-                                if(near_wall(state['bomberman'],target_wall)):
-                                    key = "B"
+                                #if(near_wall(state['bomberman'],target_wall)):     #!!!era importante, mas agora começou a dar erro com isto
+                                key = "B"
                             elif wlk_path != []:
                                 key = wlk_path[0]
                                 wlk_path = wlk_path[1:]
