@@ -50,6 +50,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         last_steps = []
         bug_steps = []
         run_check = False
+        power_up = False
         
 
         while True:
@@ -66,7 +67,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 try:
                     bomberman = state['bomberman']
                 except:
-                    bomberman = [1,1]
                     print("--+--+-+-+-+-+-+-+-+-+-+-+-+-+-+-+--+--ERROR BOMBERMAN")
                     pass
 
@@ -84,7 +84,17 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     
                 #     bug_steps = verify_last_steps(last_steps)
                 game_walls = Paredes(domain(state['bomberman'],walls,size_map,enemies_all(state['enemies'])),size_map)
-                if state['exit']!= [] and state['enemies']==[]:
+                if state['powerups']!=[]:
+                    if power_up==False:
+                        print("apanhar POWERUP")
+                        p = SearchProblem(game_walls, state['bomberman'], target_wall)
+                        t = SearchTree(p,'greedy')
+                        wlk_path = convert_to_path(t.search(100))
+                        power_up=True
+                    elif wlk_path != []:
+                        key = wlk_path[0]
+                        wlk_path = wlk_path[1:]
+                elif state['exit']!= [] and state['enemies']==[]: #ir para a saída
                     target_wall = state['exit']
                     if exit_dor == False:
                         print("-------------------target_wall-----------", target_wall)
@@ -93,7 +103,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         p = SearchProblem(game_walls, state['bomberman'], target_wall)
                         t = SearchTree(p,'greedy')
                         wlk_path = convert_to_path(t.search(100))
-                        exit_dor == True
+                        exit_dor = True
+                        power_up =False
                     if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
                         print("cheguei exit")
                         #arrive = True
@@ -189,7 +200,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 key = wlk_path[0]
                                 wlk_path = wlk_path[1:]
                     else:
-                        if arrive == False:
+                        if arrive == False:     #ir até à partida
                             target_wall = [1,1]
                             if not state['bomberman']==target_wall: #atacar paredes
                                 if run_check == False:    
@@ -208,7 +219,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 key = wlk_path[0]
                                 wlk_path = wlk_path[1:]
                         else:
-                            target_wall = [2,3]
+                            target_wall = [2,3]     #esconder-se da bomba na partida
                             if not state['bomberman']==target_wall: #atacar paredes
                                 if run_check == False:    
                                     print("not bomb")
@@ -377,8 +388,8 @@ def domain(bomberman, walls, size_map, enemie_list):
     return lista
 
 def try_area(bomberman, quadrante, walls, size_map):
-    i = 4
-    j = 4
+    i = 6
+    j = 6
     if quadrante == 1:
         while i > 0:
             while j > 0:
