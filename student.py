@@ -1,3 +1,5 @@
+#Este é o Ficheiro para avaliação
+
 import sys
 import json
 import asyncio
