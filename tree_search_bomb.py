@@ -87,6 +87,9 @@ class SearchTree:
     def search(self, limit):
         while self.open_nodes != []:
             node = self.open_nodes.pop(0)
+            if self.length+1 == limit:
+                return None
+                print("oh None")
             self.length += 1
             self.cost += node.cost
             if self.problem.goal_test(node.state):
