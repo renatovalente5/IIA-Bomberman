@@ -71,7 +71,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 )  
 
                 #print("\n\n")
-                #print(state)
+                print(state['bomberman'])
                 try:
                     bomberman = state['bomberman']
                 except:
@@ -225,13 +225,14 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         target_wall = find_close_wall(state['bomberman'],walls) #acrescentar
                         if state['bombs'] == [] and walls != []:
                             if not near_wall(state['bomberman'],target_wall): #atacar paredes
-                                if run_check == False:
+                                if run_check == False: #tentar com um count%3==0
                                     print("not bomb")
                                     print("target wall: ", target_wall)
                                     p = SearchProblem(game_walls, state['bomberman'], target_wall)
                                     t = SearchTree(p,'greedy')
                                     print("AAAAA")
-                                    x = t.search(35)
+                                    x = t.search(100)
+                                    run_check = True
                                     if x == None:
                                         print("NONE\nNONE\nNONE\nNONE")
                                         key = random_valid_key()
@@ -241,13 +242,13 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                         wlk_path = convert_to_path_wall(x)
                                         print("wlk_pathh: ", wlk_path)
                                     
-                                    if wlk_path != [] :
-                                        run_check = True
-                                    else:
-                                        print("Super erro de parar!!!!!!!!!!!!!!!")
+                                    #if wlk_path != [] :
+                                        #run_check = True
+                                    #else:
+                                        #print("Super erro de parar!!!!!!!!!!!!!!!")
                                         # key = random_valid_key(bomberman, size_map, walls)
                                         # print("Correu: ", key)
-                                        run_check = False
+                                        #run_check = False
                                     
                                         
                             # if set_bomb_danger_zones(state['bombs']) and state['bombs']!=[]:
@@ -261,7 +262,11 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 #if(near_wall(state['bomberman'],target_wall))
                                     key = "B"
                                     #on_wall = True
-                                
+                                else:
+                                    print("Matei-meeeeee!")
+                                    p = SearchProblem(game_walls, state['bomberman'], target_wall)
+                                    t = SearchTree(p,'greedy')
+                                    wlk_path = convert_to_path(t.search(100))
                                 print("Aqui maluco")
                             elif wlk_path != []:
                                 key = wlk_path[0]
@@ -281,6 +286,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 key = wlk_path[0]
                                 wlk_path = []
                                 run_check = False
+                                print("oi")
                             elif wlk_path != []:
                                 key = wlk_path[0]
                                 wlk_path = wlk_path[1:]
