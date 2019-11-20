@@ -51,7 +51,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         enemie_more_close  = []
         #catch_enemies = True # só para começar logo atrás dos inimigos
         #count = 0
-        check_balloom = False
+        check_balloom_doll = False
         pos_blue = []   #ainda não estamos a usar
 
         #Novas
@@ -67,12 +67,11 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 walls = set_walls(state['walls'])
                 powerups = state['powerups']
-
                 bomberman = state['bomberman']
                 bomb = state['bombs']
                 game_walls = Paredes(domain(state['bomberman'],walls,size_map,enemies_all(state['enemies'])),size_map)
                 enemie_more_close = find_close_wall(state['bomberman'], enemies_all(state['enemies']))
-                check_balloom = find_balloom(state['enemies'])
+                check_balloom_doll = find_balloom_doll(state['enemies'])
                 pos_blue = find_enemie_blue(bomberman, state['enemies'])
                 danger_zones = set_danger_zones(state['enemies'])
 
@@ -82,14 +81,19 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     #Are you in a savety place?
                     if not verify_range_bomb(state['bomberman'],state['bombs'][0][0],state['bombs'][0][2],size_map,walls):
                         if run_check == False:
+                            run_check = True
                             print("Calculando...")
                             w = bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], size_map, walls, danger_zones)
                             print("WWWWWWWWWWWWWWW: ", w)
                             p = SearchProblem(game_walls, state['bomberman'],w)
                             t = SearchTree(p,'greedy')
                             wlk_path = convert_to_path(t.search(100))
+                            print("wlk_path: ",wlk_path)
                             print("go from: ",bomberman," to: ",w)
-                            run_check = True
+                            if wlk_path==[]:
+                                key="A" #tentar procurar outro caminho em vez de se matar
+                                print("S\no\nu\n \nm\ne\ns\nm\no\n \nb\nu\nr\nr\no\n!!!")
+                            
                     #Not
                     else:
                         key="A"
@@ -98,7 +102,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 #Not
                 else:
                     #Is the enemies near from me? (run) (enquanto as ainda ouver paredes)
-                    if math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 2 and check_balloom==True:
+                    if math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 1.5 and check_balloom_doll==True:
                         print("Fugir do inimigo")
                         w = bomb_fled(state['bomberman'], enemie_more_close, 3, size_map, walls, danger_zones)
                         p = SearchProblem(game_walls, state['bomberman'],w)
@@ -119,7 +123,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     else:
                         #Are there enemies alive? (falta meter para atacar inimigo azul) (só quando não houver mais paredes)
                         if state['enemies']!=[] and state['walls']==[]:
-                            if check_balloom==False:
+                            if check_balloom_doll==False:
                                 target_wall = enemie_more_close
                                 print("Apanhar ENEMIE: ",target_wall)
                                 p = SearchProblem(game_walls, state['bomberman'], target_wall)
@@ -520,10 +524,10 @@ def atack_enemie(target_enemie, bomberman, prox):  #not used
             return None
     return None
 
-def find_balloom(enemies):
+def find_balloom_doll(enemies):
     for e in enemies:
         #print(e['name'])
-        if e['name'] == "Balloom":
+        if e['name'] == "Balloom" or e['name'] == "Doll":
             return True
     return False
 
