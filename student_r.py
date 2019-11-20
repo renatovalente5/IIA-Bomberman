@@ -56,6 +56,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
         #Novas
         tatic = False
+        spawn=list(mapa.bomberman_spawn)
 
 
         while True:
@@ -75,6 +76,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 pos_blue = find_enemie_blue(bomberman, state['enemies'])
                 danger_zones = set_danger_zones(state['enemies'])
 
+                
                 #Is there Bomb on the Map?
                 if(bomb != []):
                     #Are you in a savety place?
@@ -95,6 +97,17 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 #Not
                 else:
+                    #Is the enemies near from me? (run) (enquanto as ainda ouver paredes)
+                    if math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 2 and check_balloom==True:
+                        print("Fugir do inimigo")
+                        w = bomb_fled(state['bomberman'], enemie_more_close, 3, size_map, walls, danger_zones)
+                        p = SearchProblem(game_walls, state['bomberman'],w)
+                        t = SearchTree(p,'greedy')
+                        wlk_path = convert_to_path(t.search(100))
+                        print("go from: ",bomberman," to: ",w)
+                        print(wlk_path)
+                        print("Running")
+
                     #Is there item on the Map
                     if state['powerups']!=[]:
                         print("Apanhar POWERUP")
@@ -114,35 +127,35 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 wlk_path = convert_to_path_wall(t.search(100))
                         
                             #Can I reach the enemie? (Já não temos paredes?) (Fazer tatic do canto)
-                            elif not state['bomberman']==[3,7] and tatic==False:
-                                if run_check == False:    
-                                    print("not bombb")
-                                    print("target wall2: ", [3,7])
-                                    p = SearchProblem(game_walls, state['bomberman'], [3,7])
-                                    t = SearchTree(p,'greedy')
-                                    wlk_path = convert_to_path(t.search(100))
-                                    run_check = True
-                                    tatic=True
+                            # elif not state['bomberman']==[3,7] and tatic==False:  ##não pode ter ist para ficar dinamico
+                            #     if run_check == False:    
+                            #         print("not bombb")
+                            #         print("target wall2: ", [3,7])
+                            #         p = SearchProblem(game_walls, state['bomberman'], [3,7])
+                            #         t = SearchTree(p,'greedy')
+                            #         wlk_path = convert_to_path(t.search(100))
+                            #         run_check = True
+                            #         tatic=True
 
-                            elif not state['bomberman']==[1,1]:
+                            elif not state['bomberman']==spawn:
                                 if run_check == False:    
                                     print("not bomb")
-                                    print("target wall2: ", [1,1])
-                                    p = SearchProblem(game_walls, state['bomberman'], [1,1])
+                                    print("target wall2: ", spawn)
+                                    p = SearchProblem(game_walls, state['bomberman'], spawn)
                                     t = SearchTree(p,'greedy')
                                     wlk_path = convert_to_path(t.search(100))
                                     run_check = True
                             
                             elif math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 2:
-                                if not state['bomberman']==[2,3]: #esconder-se da bomba na partida
-                                    if run_check == False:    
-                                        print("target wall3: ", [2,3])
-                                        p = SearchProblem(game_walls, state['bomberman'], [2,3])
-                                        t = SearchTree(p,'greedy')
-                                        wlk_path = convert_to_path(t.search(100))
-                                        wlk_path.insert(0,"B")
-                                        run_check =  True
-                            
+                                wlk_path=["B"]
+
+                                if run_check == False and bomb!=[]:
+                                    w = bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], size_map, walls, danger_zones)
+                                    p = SearchProblem(game_walls, state['bomberman'],w)
+                                    t = SearchTree(p,'greedy')
+                                    wlk_path = convert_to_path(t.search(100))
+                                    wlk_path.insert(0,"B")
+                                    run_check = True
                             #Not - (Atacar paredes)
                             # target_wall = find_close_wall(state['bomberman'],walls)
                             # if not near_wall(state['bomberman'],target_wall): #atacar paredes
