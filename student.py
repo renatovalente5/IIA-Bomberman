@@ -71,7 +71,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 )  
 
                 #print("\n\n")
-                print(state['bomberman'])
+                #print(state['bomberman'])
                 try:
                     bomberman = state['bomberman']
                 except:
@@ -159,7 +159,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         t = SearchTree(p,'greedy')
                         wlk_path = convert_to_path(t.search(100))
                         power_up=True
-                    if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
+                    if (wlk_path == ['A'] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
                         power_up=False
                         count_powerups+=1
                         print("cheguei POWER_UP")
@@ -212,7 +212,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         t = SearchTree(p,'greedy')
                         wlk_path = convert_to_path(t.search(100))
                         exit_dor = True
-                    if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
+                    if (wlk_path == ['A'] or wlk_path == []):
                         exit_dor = False
                         print("cheguei exit")
                         #arrive = True
@@ -256,7 +256,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             #     wlk_path = []
                             #     on_wall = True
                             #     run_check = False
-                            if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
+                            if (wlk_path == ['A'] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
                                 run_check = False
                                 if(near_wall(state['bomberman'],target_wall)) and state['bomberman']!=[1,1]:     #!!!era importante, mas agora começou a dar erro com isto
                                 #if(near_wall(state['bomberman'],target_wall))
@@ -267,6 +267,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                     p = SearchProblem(game_walls, state['bomberman'], target_wall)
                                     t = SearchTree(p,'greedy')
                                     wlk_path = convert_to_path(t.search(100))
+                                    key="A"
                                 print("Aqui maluco")
                             elif wlk_path != []:
                                 key = wlk_path[0]
@@ -293,7 +294,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     else:
                         if arrive2 == False:
                             target_wall = [2,7]
-                            if not state['bomberman']==target_wall: #atacar paredes
+                            if not state['bomberman']==target_wall:
                                 if run_check == False:    
                                     print("not bomb")
                                     print("target wall2: ", target_wall)
@@ -304,7 +305,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             # if set_bomb_danger_zones(state['bombs']) and state['bombs']!=[]:
                             #     key = "A"
                             #     wlk_path = []
-                            if (wlk_path == [''] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
+                            if (wlk_path == ['A'] or wlk_path == []):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
                                 print("cheguei [2,7]")
                                 arrive2 = True
                                 run_check = False
@@ -315,7 +316,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                         elif arrive == False:     #ir até à partida
                             target_wall = [1,1]
-                            if not state['bomberman']==target_wall: #atacar paredes
+                            if not state['bomberman']==target_wall:
                                 if run_check == False:    
                                     print("not bomb")
                                     print("target wall2: ", target_wall)
@@ -326,7 +327,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             # if set_bomb_danger_zones(state['bombs']) and state['bombs']!=[]:
                             #     key = "A"
                             #     wlk_path = []
-                            if (wlk_path == [''] or wlk_path == []) and math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 2:#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
+                            if (wlk_path == ['A'] or wlk_path == []) and math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 2:#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
                                 print("cheguei [1,1]")
                                 arrive = True
                                 run_check = False
@@ -336,7 +337,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 wlk_path = wlk_path[1:]
                         else:
                             target_wall = [2,3]     #esconder-se da bomba na partida
-                            if not state['bomberman']==target_wall: #atacar paredes
+                            if not state['bomberman']==target_wall:
                                 if run_check == False:    
                                     print("not bomb")
                                     print("target wall3: ", target_wall)
@@ -344,7 +345,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                     t = SearchTree(p,'greedy')
                                     wlk_path = convert_to_path(t.search(100))
                                     run_check =  True
-                            if ((wlk_path == [''] or wlk_path == []) and state['bombs']==[]):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
+                            if ((wlk_path == ['A'] or wlk_path == []) and state['bombs']==[]):#and near_wall(bomberman, find_close_wall(bomberman, walls)):# and x==None:
                                 print("cheguei [3,3]")
                                 arrive = False
                                 run_check = False
@@ -531,7 +532,7 @@ def convert_to_path(p):
     elif p[0][1] - p[1][1] == -1:
         return ["s"] + convert_to_path(p[1:])
 def convert_to_path_wall(p):
-    print("YESSSSSSSSSSSSSSSSSSSSSSSSSSS")
+    #print("YESSSSSSSSSSSSSSSSSSSSSSSSSSS")
     if p == None:
         return []
     if len(p) == 2:
