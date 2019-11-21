@@ -205,6 +205,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     wlk_path = wlk_path[1:]
 
                 save_pos.insert(0,bomberman)    #guardar as posições do Bomberman
+                if len(save_pos) > 45:
+                    save_pos = save_pos[:-1]
                 if pos_last(save_pos, bomberman) == True and bomberman!=spawn:  #Se estiver sempre na mesma posição vai para o início
                     p = SearchProblem(game_walls, state['bomberman'],spawn)
                     t = SearchTree(p,'greedy')
