@@ -38,25 +38,15 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         bomberman = []
         game_walls = None
         size_map = mapa.size
-        #on_wall = None
-        #pos_enemie = []
-        #arrive = False
-        #arrive2 = False
-        #exit_dor = False
-        #last_steps = []
-        #bug_steps = []
         run_check = False
-        #run_check2 = False
-        #power_up = False
         enemie_more_close  = []
-        #catch_enemies = True # só para começar logo atrás dos inimigos
-        #count = 0
         check_balloom_doll = False
-        pos_blue = []   #ainda não estamos a usar
-
-        #Novas
+        #updated
         tatic = False
         spawn=list(mapa.bomberman_spawn)
+        last_pos = []
+        save_pos = []
+        counting=0
 
 
         while True:
@@ -91,13 +81,19 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             print("wlk_path: ",wlk_path)
                             print("go from: ",bomberman," to: ",w)
                             if wlk_path==[]:
-                                key="A" #tentar procurar outro caminho em vez de se matar
+                                print("AQUI")
+                                p = SearchProblem(game_walls, state['bomberman'],spawn)
+                                t = SearchTree(p,'greedy')
+                                wlk_path = convert_to_path(t.search(1000))
+                                print("wlk_path: ",wlk_path)
+                                counting+=1                                    
+                                #key="A" #tentar procurar outro caminho em vez de se matar
                                 print("S\no\nu\n \nm\ne\ns\nm\no\n \nb\nu\nr\nr\no\n!!!")
                             
                     #Not
                     else:
                         key="A"
-                        print(key)
+                        #print(key)
 
                 #Not
                 else:
@@ -121,7 +117,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         wlk_path = convert_to_path(t.search(100))
                     #Not
                     else:
-                        #Are there enemies alive? (falta meter para atacar inimigo azul) (só quando não houver mais paredes)
+                        #Are there enemies alive? (atacar inimigos só quando não houver mais paredes)
                         if state['enemies']!=[] and state['walls']==[]:
                             if check_balloom_doll==False:
                                 target_wall = enemie_more_close
@@ -141,7 +137,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             #         run_check = True
                             #         tatic=True
 
-                            elif not state['bomberman']==spawn:
+                            elif not state['bomberman']==spawn: #ir para o spawn fazer tatic
                                 if run_check == False:    
                                     print("not bomb")
                                     print("target wall2: ", spawn)
@@ -183,12 +179,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 tatic=False
 
                             #Not - (Atacar paredes)
-                            
-                            #Enquanto ataca paredes ver se não vai contra um inimigo - fazer funções para se desviar para o lado contrario
-
-                            else:   #(Atacar paredes)
+                            else:
                                 target_wall = find_close_wall(state['bomberman'],walls)
-                                #if state['bombs'] == [] and walls != []:
                                 if not near_wall(state['bomberman'],target_wall): #atacar paredes
                                     if run_check== False:
                                         run_check = True
@@ -212,6 +204,22 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     key = wlk_path[0]
                     wlk_path = wlk_path[1:]
 
+                save_pos.insert(0,bomberman)    #guardar as posições do Bomberman
+                if pos_last(save_pos, bomberman) == True and bomberman!=spawn:  #Se estiver sempre na mesma posição vai para o início
+                    p = SearchProblem(game_walls, state['bomberman'],spawn)
+                    t = SearchTree(p,'greedy')
+                    wlk_path = convert_to_path(t.search(1000))
+                    print("wlk_path: ",wlk_path)
+                    print("Início\n\n\n\n\nInicio")
+
+                print("counting: ",counting)
+                if counting > 20:  #Quer dizer que o wlk_path esteve vazio mais do que 20 vezes
+                    p = SearchProblem(game_walls, state['bomberman'],spawn)
+                    t = SearchTree(p,'greedy')
+                    wlk_path = convert_to_path(t.search(1000))
+                    print("wlk_path: ",wlk_path)
+                    print("Início2\n\n\n\n\nInicio2")
+                    counting=0
 
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
@@ -542,6 +550,23 @@ def random_valid_key():
     val = random.randint(0,3)
     print("val: ",val)
     return aux[val]
+
+def pos_last(save_pos, pos):
+    c = 0
+    c2 = 0
+    for p in save_pos:
+        c+=1
+        if p == pos:
+            c2+=1
+            #print("++++++++++++++++++++++++++++++++++++++++++++* ", c2)
+        if c==40 and c2 <=38:
+            #print("FAlse")
+            return False
+        elif c==40 and c2 >=38:
+            #print("TRue")
+            return True
+    #print("false2")
+    return False
 
 
 # DO NOT CHANGE THE LINES BELLOW
