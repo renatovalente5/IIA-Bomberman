@@ -1,8 +1,0 @@
-#!/bin/bash
-
-if [ $1 == "start" ]
-then
-	python3 student.py
-else
-	echo "Try: ./bbb start"
-fi
