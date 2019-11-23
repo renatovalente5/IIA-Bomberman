@@ -29,18 +29,24 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
 
         walls = []
-        bomberman = []
-        powerups = []
         target_wall = []
+        target_enemie = []
         wlk_path = []
         danger_zones = []
-        enemie_more_close  = []
-        save_pos = []
+        bomb_danger_zone = []
+        powerups = []
+        bomberman = []
         game_walls = None
-        run_check = False
-        check_balloom_doll = False
         size_map = mapa.size
-        spawn = list(mapa.bomberman_spawn)
+        run_check = False
+        enemie_more_close  = []
+        check_balloom_doll = False
+        #updated
+        tatic = False
+        spawn=list(mapa.bomberman_spawn)
+        last_pos = []
+        save_pos = []
+        counting=0
 
 
         while True:
@@ -56,62 +62,77 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 game_walls = Paredes(domain(state['bomberman'],walls,size_map,enemies_all(state['enemies'])),size_map)
                 enemie_more_close = find_close_wall(state['bomberman'], enemies_all(state['enemies']))
                 check_balloom_doll = find_balloom_doll(state['enemies'])
+                pos_blue = find_enemie_blue(bomberman, state['enemies'])
                 danger_zones = set_danger_zones(state['enemies'])
 
-
+                
                 #Is there Bomb on the Map?
                 if(bomb != []):
                     #Are you in a savety place?
                     if not verify_range_bomb(state['bomberman'],state['bombs'][0][0],state['bombs'][0][2],size_map,walls):
                         if run_check == False:
                             run_check = True
-                            print("\nBomb are panted: ", state['bombs'][0][0])
+                            print("Calculando...")
                             w = bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], size_map, walls, danger_zones)
+                            print("WWWWWWWWWWWWWWW: ", w)
                             p = SearchProblem(game_walls, state['bomberman'],w)
                             t = SearchTree(p,'greedy')
                             wlk_path = convert_to_path(t.search(100))
-                            print("Go from: ",bomberman," to: ",w)
-                            if wlk_path==[]:
-                                print("Error: the wlk_path is empty, try move to Spawn")
+                            print("wlk_path: ",wlk_path)
+                            print("go from: ",bomberman," to: ",w)
+                            if wlk_path==[]:    #caso o caminho seja inpossivel, ir para o spwan e start
+                                print("AQUI")
                                 p = SearchProblem(game_walls, state['bomberman'],spawn)
                                 t = SearchTree(p,'greedy')
                                 wlk_path = convert_to_path(t.search(3000))
+                                print("wlk_path: ",wlk_path)
+                                counting+=1                                    
+                                #key="A" #tentar procurar outro caminho em vez de se matar
+                                print("S\no\nu\n \nm\ne\ns\nm\no\n \nb\nu\nr\nr\no\n!!!")
                             
                     #Not
                     else:
                         key="A"
-                        print("I'm save!")
+                        #print(key)
 
                 #Not
                 else:
-                    #Is the enemies near from me? (escape from enemie while there are Walls in map)
+                    #Is the enemies near from me? (run) (enquanto as ainda ouver paredes)
                     if math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 1.5 and check_balloom_doll==True:
-                        print("Escape ENEMIE")
+                        print("Fugir do inimigo")
                         w = bomb_fled(state['bomberman'], enemie_more_close, 3, size_map, walls, danger_zones)
                         p = SearchProblem(game_walls, state['bomberman'],w)
                         t = SearchTree(p,'greedy')
                         wlk_path = convert_to_path(t.search(100))
+                        print("go from: ",bomberman," to: ",w)
+                        print(wlk_path)
+                        print("Running")
 
                     #Is there item on the Map
                     if state['powerups']!=[]:
-                        print("Catch POWERUP")
+                        print("Apanhar POWERUP")
                         target_wall = state["powerups"][0][0]
                         p = SearchProblem(game_walls, state['bomberman'], target_wall)
                         t = SearchTree(p,'greedy')
                         wlk_path = convert_to_path(t.search(100))
                     #Not
                     else:
-                        #Are there enemies alive? (atack enemies if there isn't walls in map)
+                        #Are there enemies alive? (atacar inimigos só quando não houver mais paredes)
                         if state['enemies']!=[] and state['walls']==[]:
                             if check_balloom_doll==False:
                                 target_wall = enemie_more_close
-                                print("Catch ENEMIE")
+                                print("Apanhar ENEMIE: ",target_wall)
                                 p = SearchProblem(game_walls, state['bomberman'], target_wall)
                                 t = SearchTree(p,'greedy')
                                 wlk_path = convert_to_path_wall(t.search(100))
+                        
+                            #Can I reach the enemie? (Já não temos paredes?) (Fazer tatic do canto)
+                            #not implemented
                             
-                            elif not state['bomberman']==spawn: #Go to spawn to do tatic
+                            elif not state['bomberman']==spawn: #ir para o spawn fazer tatic
                                 if run_check == False:    
+                                    print("not bomb")
+                                    print("target wall2: ", spawn)
                                     p = SearchProblem(game_walls, state['bomberman'], spawn)
                                     t = SearchTree(p,'greedy')
                                     wlk_path = convert_to_path(t.search(100))
@@ -127,53 +148,76 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                     wlk_path = convert_to_path(t.search(100))
                                     wlk_path.insert(0,"B")
                                     run_check = True
+                            #Not - (Atacar paredes)
+                            # target_wall = find_close_wall(state['bomberman'],walls)
+                            # if not near_wall(state['bomberman'],target_wall): #atacar paredes
+                            #     if run_check== False:
+                            #         run_check = True
+                            #         print("target wall: ", target_wall)
+                            #         p = SearchProblem(game_walls, state['bomberman'], target_wall)
+                            #         t = SearchTree(p,'greedy')
+                            #         wlk_path = convert_to_path_wall(t.search(100))
+                            #         #tirei código
 
                         #Not
                         else:
                             #Is the exit avaliable?
-                            if state['exit']!= [] and state['enemies']==[]: #Go to the exit
+                            if state['exit']!= [] and state['enemies']==[]: #ir para a saída
                                 target_wall = state['exit']
-                                print("-----------Target EXIT-----------")
+                                print("-------------------Target_EXIT-----------", target_wall)
                                 p = SearchProblem(game_walls, state['bomberman'], target_wall)
                                 t = SearchTree(p,'greedy')
                                 wlk_path = convert_to_path(t.search(100))
+                                tatic=False
 
-                            #Not - (Atack Walls)
+                            #Not - (Atacar paredes)
                             else:
                                 target_wall = find_close_wall(state['bomberman'],walls)
-                                if not near_wall(state['bomberman'],target_wall):
+                                if not near_wall(state['bomberman'],target_wall): #atacar paredes
                                     if run_check== False:
                                         run_check = True
+                                        print("target wall: ", target_wall)
                                         p = SearchProblem(game_walls, state['bomberman'], target_wall)
                                         t = SearchTree(p,'greedy')
                                         x = t.search(100)
-                                        if x == None:   #If the Bomberman are undicided in 2 paths
-                                            print("Error: Don't know the best path: so try move random!")
+                                        if x == None:   #Caso o Bomberman fique indeciso entre 2 caminhos
+                                            print("NONE\nNONE\nNONE\nNONE")
                                             key = random_valid_key()
                                         else:
                                             wlk_path = convert_to_path_wall(x)
 
-                #Read DATAPATH
+                #LER DATAPATH
                 if (wlk_path == ['A'] or wlk_path == []):
                     run_check = False
-                    if(near_wall(state['bomberman'],target_wall)) and bomb == []:
+                    if(near_wall(state['bomberman'],target_wall)) and bomb == []:# and state['bomberman']!=[1,1]:     #!!!era importante, mas agora começou a dar erro com isto
                         key = "B"
                 elif wlk_path != []:
+                    #print("wlk_path: " ,wlk_path)
                     key = wlk_path[0]
                     wlk_path = wlk_path[1:]
 
-                save_pos.insert(0,bomberman) #Save the last positions of Bomberman
+                save_pos.insert(0,bomberman)    #guardar as posições do Bomberman
                 if len(save_pos) > 45:
                     save_pos = save_pos[:-1]
-                if pos_last(save_pos, bomberman) == True and bomberman!=spawn:  #If are always in the same position, try move to the spawn
+                if pos_last(save_pos, bomberman) == True and bomberman!=spawn:  #Se estiver sempre na mesma posição vai para o início
                     p = SearchProblem(game_walls, state['bomberman'],spawn)
                     t = SearchTree(p,'greedy')
                     wlk_path = convert_to_path(t.search(3000))
-                    print("Error: Try move to the Spawn")
+                    print("wlk_path: ",wlk_path)
+                    print("Início\n\n\n\n\nInicio")
+
+                print("counting: ",counting)
+                if counting > 6:  #Quer dizer que o wlk_path esteve vazio, e é para tentar solucionar o problema sem ter de ir ao spawn
+                    p = SearchProblem(game_walls, state['bomberman'],spawn)
+                    t = SearchTree(p,'greedy')
+                    wlk_path = convert_to_path(t.search(3000))
+                    print("wlk_path: ",wlk_path)
+                    print("Início2\n\n\n\n\nInicio2")
+                    counting=0
 
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
-                )  # send key command to server
+                )  # send key command to server - you must implement this send in the AI agent
             except websockets.exceptions.ConnectionClosedOK:
                 print("Server has cleanly disconnected us")
                 return
@@ -189,18 +233,43 @@ def valid_pos(pos, size_map, walls):
         return False
     return True
 
+def valid_moove(pos, mov, size_map, walls): #not used
+    if pos[0] == 1 and mov == "a":
+        return False
+    if pos[1] == 1 and mov == "w":
+        return False
+    if pos[0] == size_map[0]-1 and mov == "d":
+        return False
+    if pos[1] == size_map[1]-1 and mov == "s":
+        return False
+    if pos[0] % 2 == 0 and (mov == "s" or mov == "w"):
+        return False
+    if pos[1] % 2 == 0 and (mov == "d" or mov == "a"):
+        return False
+    for i in walls:
+        if mov == "w" and [pos[0],pos[1]-1] == i:
+            return False
+        if mov == "a" and [pos[0]-1,pos[1]] == i:
+            return False
+        if mov == "s" and [pos[0],pos[1]+1] == i:
+            return False
+        if mov == "d" and [pos[0]+1,pos[1]] == i:
+            return False
+    return True
+
 def near_wall(bomberman, wall):
     if math.hypot(wall[0]-bomberman[0],wall[1]-bomberman[1]) == 1:
         return True
     return False
 
-def near(bomberman, wall):
+def near(bomberman, wall):  #not used but usefull
     if math.hypot(wall[0]-bomberman[0],wall[1]-bomberman[1]) <= 2:
         return True
     return False
 
 def bomb_fled(bomberman, bomba, radius, size_map, walls, danger_zones, a=3):
     b = a
+    print("bomb: ",bomba)
     for x in range(a):
         for y in range(b):
             if verify_range_bomb([bomba[0]-x,bomba[1]-y], bomba, radius, size_map, walls) and ([bomba[0]-x,bomba[1]-y] not in danger_zones):
@@ -220,6 +289,12 @@ def bomb_fled(bomberman, bomba, radius, size_map, walls, danger_zones, a=3):
             if verify_range_bomb([bomba[0],bomba[1]+y], bomba, radius, size_map, walls) and ([bomba[0],bomba[1]+y] not in danger_zones):
                 return [bomba[0],bomba[1]+y]
     bomb_fled(bomberman,bomba,radius,size_map,walls,b+1)
+
+def bomb_safe(bomberman, bomb_danger_zone): #not used
+    for i in bomb_danger_zone:
+        if bomberman == i:
+            return False
+    return True
 
 def find_close_wall(bomberman, walls):
     aux = 100000
@@ -276,7 +351,29 @@ def verify_range_bomb(bomberman, bomb, radius, size_map, walls):
         return False
     elif not valid_pos(bomberman, size_map, walls):
         return False
+    #print(True)
     return True
+
+def domain2(bomberman, walls, size_map, enemie_list):   #not used
+    y = size_map[1]
+    x = size_map[0]
+    lista = []
+    i = 1
+    while i < x:
+        j = 1
+        while j < y:
+            if valid_pos([i,j],size_map,walls) and [i,j] not in enemie_list:
+                if valid_pos([i+1,j],size_map,walls):
+                    lista += [([i,j],[i+1,j],1)]
+                if valid_pos([i-1,j],size_map,walls):
+                    lista += [([i,j],[i-1,j],1)]
+                if valid_pos([i,j+1],size_map,walls):
+                    lista += [([i,j],[i,j+1],1)]
+                if valid_pos([i,j-1],size_map,walls):
+                    lista += [([i,j],[i,j-1],1)]
+            j += 1
+        i += 1
+    return lista
 
 def domain(bomberman, walls, size_map, enemie_list):
     y = size_map[1]
@@ -298,6 +395,60 @@ def domain(bomberman, walls, size_map, enemie_list):
             j += 1
         i += 1
     return lista
+
+def try_area(bomberman, quadrante, walls, size_map):    #not used
+    i = 6
+    j = 6
+    if quadrante == 1:
+        while i > 0:
+            while j > 0:
+                if(valid_pos([bomberman[0]-i,bomberman[1]-j],size_map,walls)):
+                    return [bomberman[0]-i,bomberman[1]-j]
+                j -= 1
+            i -=1
+    elif quadrante == 2:
+        while i > 0:
+            while j > 0:
+                if(valid_pos([bomberman[0]+i,bomberman[1]-j],size_map,walls)):
+                    return [bomberman[0]+i,bomberman[1]-j]
+                j -= 1
+            i -=1
+    elif quadrante == 3:
+        while i > 0:
+            while j > 0:
+                if(valid_pos([bomberman[0]+i,bomberman[1]+j],size_map,walls)):
+                    return [bomberman[0]+i,bomberman[1]+j]
+                j -= 1
+            i -=1
+    elif quadrante == 4:
+        while i > 0:
+            while j > 0:
+                if(valid_pos([bomberman[0]-i,bomberman[1]+j],size_map,walls)):
+                    return [bomberman[0]-i,bomberman[1]+j]
+                j -= 1
+            i -=1
+    elif quadrante == 5:
+        while i > 0:
+            if(valid_pos([bomberman[0],bomberman[1]-i],size_map,walls)):
+                    return [bomberman[0],bomberman[1]-i]
+            i -= 1
+    elif quadrante == 6:
+        while i > 0:
+            if(valid_pos([bomberman[0]+i,bomberman[1]],size_map,walls)):
+                    return [bomberman[0]+i,bomberman[1]]
+            i -= 1
+    elif quadrante == 7:
+        while i > 0:
+            if(valid_pos([bomberman[0],bomberman[1]+i],size_map,walls)):
+                    return [bomberman[0],bomberman[1]+i]
+            i -= 1
+    elif quadrante == 8:
+        while i > 0:
+            if(valid_pos([bomberman[0]-i,bomberman[1]],size_map,walls)):
+                    return [bomberman[0]-i,bomberman[1]]
+            i -= 1
+    print("YAP ACORREU ERRO++++++++++++++++++++++++++++++++++")
+    return [bomberman[0] +1,bomberman[1]+1]
 
 def set_walls(wall):
     walls = []
@@ -321,21 +472,77 @@ def set_danger_zones(enemies):
         i += 1
     return danger_zones
 
+def set_bomb_danger_zones(bombs):   #not used
+    bomb_danger_zone = []
+    for bomb in bombs:
+        i = -bomb[2]
+        while i <= bomb[2]:
+            bomb_danger_zone += [[bomb[0][0]+i,bomb[0][1]],
+            [bomb[0][0],bomb[0][1]+i]]
+            i += 1
+        bomb_danger_zone += bomb
+    if bomb_danger_zone !=[]:
+        bomb_danger_zone.pop()
+        bomb_danger_zone.pop()
+    print("bomb_danger_zone: ", bomb_danger_zone)
+    return bomb_danger_zone
+
+def save_bomb_danger_zones(pos, range_bomb):    #not used
+    for bomb in range_bomb:
+        if pos == range_bomb or range_bomb== []:
+            print("pos: ",pos)
+            print("range_bomb: ",range_bomb)
+            print("false")
+            return False
+    print("pos: ",pos)
+    print("range_bomb: ",range_bomb)
+    print("True")        
+    return True
+
 def enemies_all(enemies):
     arr = []
     for i in enemies:
         arr += [i['pos']]
     return arr
 
+def find_enemie_pos(enemie,walls,size):     #not used
+    if valid_pos([enemie[0]+1,enemie[1]],size,walls):
+        return [enemie[0]+1,enemie[1]]
+    return None
+
+def near_enemie(target_enemie, bomberman, prox):    #not used
+    for enemie in target_enemie:
+        if math.hypot(enemie['pos'][0]-bomberman[0],enemie['pos'][1]-bomberman[1]) < prox:
+            return True
+        else:
+            return False
+    return False
+
+def atack_enemie(target_enemie, bomberman, prox):  #not used
+    for enemie in target_enemie:
+        if math.hypot(enemie['pos'][0]-bomberman[0],enemie['pos'][1]-bomberman[1]) < prox:
+            return enemie['pos'] #[enemie['pos'][0]-2, enemie['pos'][1]]
+        else:
+            return None
+    return None
+
 def find_balloom_doll(enemies):
     for e in enemies:
+        #print(e['name'])
         if e['name'] == "Balloom" or e['name'] == "Doll":
             return True
     return False
 
+def find_enemie_blue(pos, enemies):
+    for enemie in enemies:
+        if enemie['name'] == "Oneal":    #falta garantir que é só para os blue
+            return enemie['pos']
+    return []
+
 def random_valid_key():
     aux = ["w", "d", "s", "a"]
     val = random.randint(0,3)
+    print("val: ",val)
     return aux[val]
 
 def pos_last(save_pos, pos):
@@ -345,10 +552,14 @@ def pos_last(save_pos, pos):
         c+=1
         if p == pos:
             c2+=1
+            #print("++++++++++++++++++++++++++++++++++++++++++++* ", c2)
         if c==40 and c2 <=38:
+            #print("FAlse")
             return False
         elif c==40 and c2 >=38:
+            #print("TRue")
             return True
+    #print("false2")
     return False
 
 
