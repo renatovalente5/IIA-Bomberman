@@ -58,6 +58,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 check_balloom_doll = find_balloom_doll(state['enemies'])
                 danger_zones = set_danger_zones(state['enemies'])
 
+                print("lives: ", state['lives'])
 
                 #Is there Bomb on the Map?
                 if(bomb != []):
@@ -75,7 +76,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 print("Error: the wlk_path is empty, try move to Spawn")
                                 p = SearchProblem(game_walls, state['bomberman'],spawn)
                                 t = SearchTree(p,'greedy')
-                                wlk_path = convert_to_path(t.search(3000))
+                                wlk_path = convert_to_path(t.search(100)) #experimentar com 10000
                             
                     #Not
                     else:
@@ -84,8 +85,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 #Not
                 else:
-                    #Is the enemies near from me? (escape from enemie while there are Walls in map)
-                    if math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 1.5 and check_balloom_doll==True:
+                    #Is the enemies near from me? (escape from enemie while there are Walls in map)      #1.9?
+                    if math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 1.8 and check_balloom_doll==True:
                         print("Escape ENEMIE")
                         w = bomb_fled(state['bomberman'], enemie_more_close, 3, size_map, walls, danger_zones)
                         p = SearchProblem(game_walls, state['bomberman'],w)
@@ -168,7 +169,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 if pos_last(save_pos, bomberman) == True and bomberman!=spawn:  #If are always in the same position, try move to the spawn
                     p = SearchProblem(game_walls, state['bomberman'],spawn)
                     t = SearchTree(p,'greedy')
-                    wlk_path = convert_to_path(t.search(3000))
+                    wlk_path = convert_to_path(t.search(100)) #Experimentar com 3000
                     print("Error: Try move to the Spawn")
 
                 await websocket.send(
