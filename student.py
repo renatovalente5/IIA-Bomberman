@@ -73,10 +73,12 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             wlk_path = convert_to_path(t.search(100))
                             print("Go from: ",bomberman," to: ",w)
                             if wlk_path==[]:
-                                print("Error: the wlk_path is empty, try move to Spawn")
-                                p = SearchProblem(game_walls, state['bomberman'],spawn)
-                                t = SearchTree(p,'greedy')
-                                wlk_path = convert_to_path(t.search(100)) #experimentar com 10000
+                                key = random_valid_key()
+                                print("kkkey: ", key)
+                                # print("Error: the wlk_path is empty, try move to Spawn")
+                                # p = SearchProblem(game_walls, state['bomberman'],spawn)
+                                # t = SearchTree(p,'greedy')
+                                # wlk_path = convert_to_path(t.search(1000)) #experimentar com 10000
                             
                     #Not
                     else:
@@ -92,6 +94,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         p = SearchProblem(game_walls, state['bomberman'],w)
                         t = SearchTree(p,'greedy')
                         wlk_path = convert_to_path(t.search(100))
+                        if bomberman == [3,28]: # Falta testar estas 2 linhas
+                            wlk_path = ['B']    # Falta testar estas 2 linhas
 
                     #Is there item on the Map
                     if state['powerups']!=[]:
@@ -109,7 +113,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 print("Catch ENEMIE")
                                 p = SearchProblem(game_walls, state['bomberman'], target_wall)
                                 t = SearchTree(p,'greedy')
-                                wlk_path = convert_to_path_wall(t.search(100))
+                                wlk_path = convert_to_path_wall(t.search(500))
                             
                             elif not state['bomberman']==spawn: #Go to spawn to do tatic
                                 if run_check == False:    
@@ -163,14 +167,18 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     key = wlk_path[0]
                     wlk_path = wlk_path[1:]
 
-                save_pos.insert(0,bomberman) #Save the last positions of Bomberman
-                if len(save_pos) > 45:
+                # save_pos.insert(0,bomberman) #Save the last positions of Bomberman
+                if len(save_pos) > 100:       
                     save_pos = save_pos[:-1]
                 if pos_last(save_pos, bomberman) == True and bomberman!=spawn:  #If are always in the same position, try move to the spawn
-                    p = SearchProblem(game_walls, state['bomberman'],spawn)
-                    t = SearchTree(p,'greedy')
-                    wlk_path = convert_to_path(t.search(100)) #Experimentar com 3000
-                    print("Error: Try move to the Spawn")
+                    # p = SearchProblem(game_walls, state['bomberman'],spawn)
+                    # t = SearchTree(p,'greedy')
+                    # wlk_path = convert_to_path(t.search(5000)) #Experimentar com 3000
+                    print("Error: Try move to the Spawn") #Em vez disto tentar mandar Key Random
+                    #key = random_valid_key()
+                    key = "A"
+                    print("yekey: ", key)
+                    print("wwpath ignored: ", wlk_path)
 
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
@@ -346,9 +354,10 @@ def pos_last(save_pos, pos):
         c+=1
         if p == pos:
             c2+=1
-        if c==40 and c2 <=38:
+        if c==95 and c2 <=92:
             return False
-        elif c==40 and c2 >=38:
+        elif c==95 and c2 >=92:
+            print("Hora de rebentar com a bomba!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             return True
     return False
 
