@@ -86,7 +86,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         w = bomb_fled(bomberman, enemie_more_close, 3, size_map, walls, danger_zones, 3) #fugir para a o lado esquerdo
                         p = SearchProblem(game_walls, bomberman,w)
                         t = SearchTree(p,'greedy')
-                        wlk_path = convert_to_path(t.search(200))
+                        wlk_path = convert_to_path(t.search(50))
                         #     else:
                         #         print("run rigth-------------------------------------------------------")
                         #         w = bomb_fled_rigth(bomberman, enemie_more_close, 3, size_map, walls, danger_zones, 3) #fugir para o lado direito
@@ -147,7 +147,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         w = bomb_fled(bomberman, enemie_more_close, 3, size_map, walls, danger_zones, 3)
                         p = SearchProblem(game_walls, bomberman,w)
                         t = SearchTree(p,'greedy')
-                        wlk_path = convert_to_path(t.search(500))
+                        wlk_path = convert_to_path(t.search(20))
                         if bomberman == [3,28]: #work good
                             print("NEAR")
                             wlk_path = ['B'] 

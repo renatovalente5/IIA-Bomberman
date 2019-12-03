@@ -1,2 +1,7 @@
 Score: level 2 lives: 0
 Score: level 3 lives: 0
+Score: level 1 lives: 0
+Score: level 1 lives: 0
+Score: level 1 lives: 0
+Score: level 1 lives: 0
+Score: level 3 lives: 0
