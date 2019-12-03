@@ -5,3 +5,12 @@ Score: level 1 lives: 0
 Score: level 1 lives: 0
 Score: level 1 lives: 0
 Score: level 3 lives: 0
+Score: level 9 lives: 0
+Score: level 2 lives: 0
+Com os 4 Bomb_Fled
+Score: level 4 lives: 0
+Score: level 3 lives: 0
+Sem fugir dos inimigos apos meter bomba
+Score: level 3 lives: 0
+Score: level 5 lives: 0
+Score: level 14 lives: 0

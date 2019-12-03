@@ -56,7 +56,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 level = state['level']
                 lives = state['lives']
-
+                print("lives " ,lives)
                 #Gravar os scores do jogo
                 if state['lives'] == 0:
                     f = open("scores.txt", "a")
@@ -80,32 +80,32 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     #Meter a escapar dos inimigos tb aqui                                               
                     if math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 1.9 and bomberman[0]>2 and bomberman[1]>2: # and check_balloom_doll==True:
                         print("Escape ENEMIE")  #Mudar este Bomb_Fled dependendo do lado que vem o inimigo (detalhar melhor)
-                        #if enemie_more_close[1]==bomberman[1]:
-                            #if enemie_more_close[0] > bomberman[0]:
-                                #print("run left-------------------------------------------------------")
-                        w = bomb_fled(bomberman, enemie_more_close, 3, size_map, walls, danger_zones, 3) #fugir para a o lado esquerdo
-                        p = SearchProblem(game_walls, bomberman,w)
-                        t = SearchTree(p,'greedy')
-                        wlk_path = convert_to_path(t.search(50))
-                        #     else:
-                        #         print("run rigth-------------------------------------------------------")
-                        #         w = bomb_fled_rigth(bomberman, enemie_more_close, 3, size_map, walls, danger_zones, 3) #fugir para o lado direito
-                        #         p = SearchProblem(game_walls, bomberman,w)
-                        #         t = SearchTree(p,'greedy')
-                        #         wlk_path = convert_to_path(t.search(200))
-                        # elif enemie_more_close[0]==bomberman[0]:
-                        #     if enemie_more_close[1] > bomberman[1]:
-                        #         print("run UP-------------------------------------------------------")
-                        #         w = bomb_fled_up(bomberman, enemie_more_close, 3, size_map, walls, danger_zones, 3) #fugir para cima
-                        #         p = SearchProblem(game_walls, bomberman,w)
-                        #         t = SearchTree(p,'greedy')
-                        #         wlk_path = convert_to_path(t.search(200))
-                        #     else:
-                        #         print("run Down-------------------------------------------------------")
-                        #         w = bomb_fled_down(bomberman, enemie_more_close, 3, size_map, walls, danger_zones, 3) #fugir para baixo
-                        #         p = SearchProblem(game_walls, bomberman,w)
-                        #         t = SearchTree(p,'greedy')
-                        #         wlk_path = convert_to_path(t.search(200))
+                        if enemie_more_close[1]==bomberman[1]:
+                            if enemie_more_close[0] > bomberman[0]:
+                                print("run left-------------------------------------------------------")
+                                w = bomb_fled(bomberman, enemie_more_close, 3, size_map, walls, danger_zones, 3) #fugir para a o lado esquerdo
+                                p = SearchProblem(game_walls, bomberman,w)
+                                t = SearchTree(p,'greedy')
+                                wlk_path = convert_to_path(t.search(20))
+                            else:
+                                print("run rigth-------------------------------------------------------")
+                                w = bomb_fled_rigth(bomberman, enemie_more_close, 3, size_map, walls, danger_zones, 3) #fugir para o lado direito
+                                p = SearchProblem(game_walls, bomberman,w)
+                                t = SearchTree(p,'greedy')
+                                wlk_path = convert_to_path(t.search(20))
+                        elif enemie_more_close[0]==bomberman[0]:
+                            if enemie_more_close[1] > bomberman[1]:
+                                print("run UP-------------------------------------------------------")
+                                w = bomb_fled_up(bomberman, enemie_more_close, 3, size_map, walls, danger_zones, 3) #fugir para cima
+                                p = SearchProblem(game_walls, bomberman,w)
+                                t = SearchTree(p,'greedy')
+                                wlk_path = convert_to_path(t.search(20))
+                            else:
+                                print("run Down-------------------------------------------------------")
+                                w = bomb_fled_down(bomberman, enemie_more_close, 3, size_map, walls, danger_zones, 3) #fugir para baixo
+                                p = SearchProblem(game_walls, bomberman,w)
+                                t = SearchTree(p,'greedy')
+                                wlk_path = convert_to_path(t.search(20))
                         
                     #Are you in a savety place?
                     elif not verify_range_bomb(bomberman,state['bombs'][0][0],state['bombs'][0][2],size_map,walls):
@@ -128,7 +128,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     #Not
                     else:
                         key="A"
-                        print("I'm save!")
+                        #print("I'm save!")
 
                 #Not
                 else:
@@ -143,7 +143,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                     #Is the enemies near from me? (escape from enemie while there are Walls in map)
                     if math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 1.9 and check_balloom_doll==True:
-                        print("Escape ENEMIE")
+                        print("Escape ENEMIE without bomb")
                         w = bomb_fled(bomberman, enemie_more_close, 3, size_map, walls, danger_zones, 3)
                         p = SearchProblem(game_walls, bomberman,w)
                         t = SearchTree(p,'greedy')
