@@ -178,7 +178,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     else:
                         count_best+=1   #Try move sometimes with key random
                         key = random_valid_key()
-                if count_c > 50:   #If bomberman are in a infinity loop
+                if count_c > 200:   #If bomberman are in a infinity loop
                     key = random_valid_key() 
                     print("LOOP, so random")
 
