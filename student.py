@@ -98,6 +98,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         t = SearchTree(p,'greedy')
                         wlk_path = convert_to_path(t.search(20))
                         if bomberman == [3,28]:
+                            print("NEAR")
                             wlk_path = ['B'] 
 
                     #Is there item on the Map
