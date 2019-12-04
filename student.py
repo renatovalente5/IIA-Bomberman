@@ -42,6 +42,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         check_balloom_doll = False
         spawn = list(mapa.bomberman_spawn)
         count_best = 1
+        count_c = 0
 
 
         while True:
@@ -58,6 +59,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 enemie_more_close = find_close_wall(state['bomberman'], enemies_all(state['enemies']))
                 check_balloom_doll = find_balloom_doll(state['enemies'])
                 danger_zones = set_danger_zones(state['enemies'])
+                count_c = count_close(enemie_more_close, bomberman, count_c)
 
                 #Is there Bomb on the Map?
                 if(bomb != []):
@@ -68,7 +70,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             w = bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], mapa, walls, danger_zones)
                             p = SearchProblem(game_walls, state['bomberman'],w)
                             t = SearchTree(p,'greedy')
-                            wlk_path = convert_to_path(t.search(30))
+                            wlk_path = convert_to_path(t.search(50))
                             if wlk_path==[]:
                                 key = random_valid_key()
                                 if detonator == True:
@@ -91,8 +93,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         w = bomb_fled(state['bomberman'], enemie_more_close, 3, mapa, walls, danger_zones)
                         p = SearchProblem(game_walls, state['bomberman'],w)
                         t = SearchTree(p,'greedy')
-                        wlk_path = convert_to_path(t.search(20))
-                        if bomberman == [3,28]:
+                        wlk_path = convert_to_path(t.search(50))
+                        if bomberman == [3,28] or bomberman == [5,28]:
                             wlk_path = ['B'] 
 
                     #Is there item on the Map
@@ -100,7 +102,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         target_wall = state["powerups"][0][0]
                         p = SearchProblem(game_walls, state['bomberman'], target_wall)
                         t = SearchTree(p,'greedy')
-                        wlk_path = convert_to_path(t.search(30))
+                        wlk_path = convert_to_path(t.search(50))
                         if state['level']==3:
                             detonator = True
                     #Not
@@ -120,7 +122,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 if run_check == False:    
                                     p = SearchProblem(game_walls, state['bomberman'], spawn)
                                     t = SearchTree(p,'greedy')
-                                    wlk_path = convert_to_path(t.search(200))
+                                    wlk_path = convert_to_path(t.search(500))
                                     run_check = True
                             
                             elif math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 2:
@@ -130,7 +132,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                     w = bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], mapa, walls, danger_zones)
                                     p = SearchProblem(game_walls, state['bomberman'],w)
                                     t = SearchTree(p,'greedy')
-                                    wlk_path = convert_to_path(t.search(30))
+                                    wlk_path = convert_to_path(t.search(50))
                                     wlk_path.insert(0,"B")
                                     run_check = True
 
@@ -151,7 +153,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                         run_check = True
                                         p = SearchProblem(game_walls, state['bomberman'], target_wall)
                                         t = SearchTree(p,'greedy')
-                                        x = t.search(100)
+                                        x = t.search(200)
                                         if x == None:   #If the Bomberman are undicided in 2 paths
                                             key = random_valid_key()
                                             run_check = False
@@ -176,7 +178,10 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         key = "A"
                     else:
                         count_best+=1   #Try move sometimes with key random
-                        key = random_valid_key() 
+                        key = random_valid_key()
+                if count_c > 50:   #If bomberman are in a infinity loop
+                    key = random_valid_key() 
+                    print("LOOP, so random")
 
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
@@ -353,6 +358,11 @@ def pos_last(save_pos, pos):
             return True
     return False
 
+def count_close(enemie_more_close, pos, count_c):
+    if math.hypot(enemie_more_close[0]-pos[0],enemie_more_close[1]-pos[1]) <= 4:
+        return count_c + 1   
+    else:
+        return 0
 
 # DO NOT CHANGE THE LINES BELLOW
 # You can change the default values using the command line, example:
