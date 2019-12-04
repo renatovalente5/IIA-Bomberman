@@ -58,7 +58,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 game_walls = Paredes(domain(state['bomberman'],walls,mapa,enemies_all(state['enemies'])))
                 enemie_more_close = find_close_wall(state['bomberman'], enemies_all(state['enemies']))
                 check_balloom_doll = find_balloom_doll(state['enemies'])
-                danger_zones = set_danger_zones(state['enemies'])
                 count_c = count_close(enemie_more_close, bomberman, count_c)
 
                 #Is there Bomb on the Map?
@@ -311,22 +310,6 @@ def set_walls(wall):
     for i in wall:
         walls += [i]
     return walls
-    
-def set_danger_zones(enemies):
-    danger_zones = []
-    i = 0
-    while i < len(enemies):
-        danger_zones += [enemies[i]['pos'],
-        [enemies[i]['pos'][0]+1,enemies[i]['pos'][1]+0],
-        [enemies[i]['pos'][0]-1,enemies[i]['pos'][1]+0],
-        [enemies[i]['pos'][0]-1,enemies[i]['pos'][1]+1],
-        [enemies[i]['pos'][0]+0,enemies[i]['pos'][1]+1],
-        [enemies[i]['pos'][0]+1,enemies[i]['pos'][1]+1],
-        [enemies[i]['pos'][0]-1,enemies[i]['pos'][1]-1],
-        [enemies[i]['pos'][0]+0,enemies[i]['pos'][1]-1],
-        [enemies[i]['pos'][0]+1,enemies[i]['pos'][1]-1]]
-        i += 1
-    return danger_zones
 
 def enemies_all(enemies):
     arr = []
