@@ -255,7 +255,7 @@ def convert_to_path(p):
 def convert_to_path_wall(p):
     if p == None:
         return []
-    if len(p) == 2:
+    if len(p) <= 2:
         return ["A"]
     if p[0][0] - p[1][0] == 1:
         return ["a"] + convert_to_path_wall(p[1:])
