@@ -65,16 +65,13 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     if not verify_range_bomb(state['bomberman'],state['bombs'][0][0],state['bombs'][0][2],mapa,walls):
                         if run_check == False:
                             run_check = True
-                            print("\nBomb are panted: ", state['bombs'][0][0])
                             w = bomb_fled(state['bomberman'], state['bombs'][0][0], state['bombs'][0][2], mapa, walls, danger_zones)
                             p = SearchProblem(game_walls, state['bomberman'],w)
                             t = SearchTree(p,'greedy')
                             wlk_path = convert_to_path(t.search(30))
-                            print("Go from: ",bomberman," to: ",w)
                             if wlk_path==[]:
                                 key = random_valid_key()
                                 if detonator == True:
-                                    print("Error: the wlk_path is empty, try move random")
                                     key = random_valid_key()
                                     run_check = False
                                 else:
@@ -91,18 +88,15 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 else:
                     #Is the enemies near from me? (escape from enemie while there are Walls in map)      
                     if math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 1.8 and check_balloom_doll==True:
-                        print("Escape ENEMIE")
                         w = bomb_fled(state['bomberman'], enemie_more_close, 3, mapa, walls, danger_zones)
                         p = SearchProblem(game_walls, state['bomberman'],w)
                         t = SearchTree(p,'greedy')
                         wlk_path = convert_to_path(t.search(20))
                         if bomberman == [3,28]:
-                            print("NEAR")
                             wlk_path = ['B'] 
 
                     #Is there item on the Map
                     if state['powerups']!=[]:
-                        print("Catch POWERUP")
                         target_wall = state["powerups"][0][0]
                         p = SearchProblem(game_walls, state['bomberman'], target_wall)
                         t = SearchTree(p,'greedy')
@@ -118,7 +112,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                             elif check_balloom_doll==False:
                                 target_wall = enemie_more_close
-                                print("Catch ENEMIE")
                                 p = SearchProblem(game_walls, state['bomberman'], target_wall)
                                 t = SearchTree(p,'greedy')
                                 wlk_path = convert_to_path_wall(t.search(200))
@@ -146,7 +139,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             #Is the exit avaliable?
                             if state['exit']!= [] and state['enemies']==[]: #Go to the exit
                                 target_wall = state['exit']
-                                print("-----------Target EXIT-----------")
                                 p = SearchProblem(game_walls, state['bomberman'], target_wall)
                                 t = SearchTree(p,'greedy')
                                 wlk_path = convert_to_path(t.search(100))
@@ -160,9 +152,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                         p = SearchProblem(game_walls, state['bomberman'], target_wall)
                                         t = SearchTree(p,'greedy')
                                         x = t.search(100)
-                                        print(target_wall)
                                         if x == None:   #If the Bomberman are undicided in 2 paths
-                                            print("Error: Don't know the best path: so try move random!")
                                             key = random_valid_key()
                                             run_check = False
                                         else:
@@ -183,11 +173,9 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 if pos_last(save_pos, bomberman) == True and bomberman!=spawn:  #If are always in the same position, try move to the spawn
                     if count_best%2==0:   #If the Bomberman are undicided in 2 paths
                         count_best+=1
-                        print("Error: Try Kill and Restart")
                         key = "A"
                     else:
                         count_best+=1   #Try move sometimes with key random
-                        print("best save")
                         key = random_valid_key() 
 
                 await websocket.send(
