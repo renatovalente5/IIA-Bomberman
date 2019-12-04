@@ -2,9 +2,8 @@ from tree_search_bomb import *
 import math
 
 class Paredes(SearchDomain):
-    def __init__(self,connections,size_map):
+    def __init__(self,connections):
         self.connections = connections
-        self.size_map = size_map
     def actions(self,pos):
         actlist = []
         for (C1,C2,D) in self.connections:
@@ -29,13 +28,13 @@ class Paredes(SearchDomain):
         return actlist
     def result(self,pos, action):
         k = action
-        if k=="w" and not pos[1] == 1:
+        if k=="w":
             return [pos[0],pos[1]-1]
-        if k=="a" and not pos[0] == 1:
+        if k=="a":
             return [pos[0]-1,pos[1]]
-        if k=="s" and not pos[1]-1 == self.size_map[1]:
+        if k=="s":
             return [pos[0],pos[1]+1]
-        if k=="d" and not pos[0]-1 == self.size_map[0]:
+        if k=="d":
             return [pos[0]+1,pos[1]]
     def cost(self, pos, action):
         return 1
