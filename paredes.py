@@ -26,6 +26,7 @@ class Paredes(SearchDomain):
                 elif (pos[1]-C1[1]) == -1:
                     actlist += ["w"]
         return actlist
+
     def result(self,pos, action):
         k = action
         if k=="w":
@@ -36,8 +37,10 @@ class Paredes(SearchDomain):
             return [pos[0],pos[1]+1]
         if k=="d":
             return [pos[0]+1,pos[1]]
+
     def cost(self, pos, action):
         return 1
+        
     def heuristic(self, state, goal_state):
         c1_x, c1_y = state
         c2_x, c2_y = goal_state
