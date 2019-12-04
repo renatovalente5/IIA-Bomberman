@@ -86,7 +86,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 #Not
                 else:
-                    #Is the enemies near from me? (escape from enemie while there are Walls in map)      
+                    #Is the enemies near from me? (escape from enemie while there are Walls in map)
                     if math.hypot(enemie_more_close[0]-bomberman[0],enemie_more_close[1]-bomberman[1]) <= 1.8 and check_balloom_doll==True:
                         w = bomb_fled(state['bomberman'], enemie_more_close, 3, mapa, walls, danger_zones)
                         p = SearchProblem(game_walls, state['bomberman'],w)
