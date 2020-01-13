@@ -42,3 +42,6 @@ python -m pygame.examples.aliens
 - OSX 10.14.6
 - Windows 10.0.18362
 
+### Developers:
+- [Renato Valente](https://github.com/renatovalente5)
+- [Jacinto Luf](https://github.com/JacintoLuf)
